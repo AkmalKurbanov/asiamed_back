@@ -1,0 +1,137 @@
+name: Клиника
+description: 'Клиника'
+code: 'Клиника'
+
+form:
+  tabs:
+    fields:
+      
+      separator1:
+        type: section
+        label: 'Имя сайта и лого'
+        # comment: 'Здесь начинается новая группа полей'
+        # cssClass: 'custom-separator'
+        tab: Главная информация
+    
+      name:
+        label: Имя сайта
+        type: text 
+        span: left
+        tab: Главная информация
+
+      logo:
+        label: Логотип 
+        type: fileupload  
+        mode: image
+        span: right  
+        tab: Главная информация
+        imageWidth: 200
+
+      separator2:
+        type: section
+        label: 'Режим работы'
+        comment: 'Формат Пн - Сб : 09.00 - 18:00'
+        tab: Главная информация
+
+      worktime:
+        label: Режим работы
+        type: text 
+        span: full
+        tab: Главная информация
+
+
+      separator3:
+        type: section
+        label: 'Левая часть слайдера'
+        comment: 'Краткая информация о клинике'
+        tab: Слайдер на Главной странице  
+        
+      heroTitle:
+        type: text
+        label: 'Заголовок слайдера на главной странице'
+        span: full
+        tab: Слайдер на Главной странице  
+
+      heroDoctorCount:
+        type: text
+        label: 'Количество врачей'
+        span: left
+        tab: Слайдер на Главной странице  
+
+      heroPatientCount:
+        type: text
+        label: 'Количество пациентов'
+        span: right
+        tab: Слайдер на Главной странице  
+
+      separator4:
+        type: section
+        label: 'Правая часть слайдера'
+        comment: 'Слайдер с картинкой и заголовком'
+        tab: Слайдер на Главной странице  
+
+      heroSlider:
+        type: repeater
+        prompt: 'Добавить изображение'
+        span: full
+        form:
+          fields:
+              heroSlide:
+                  label: Слайд
+                  type: mediafinder
+                  mode: image
+                  span: left
+                  imageWidth: 200
+
+              heroSlideTitle:
+                  label: Заголовк
+                  type: text
+                  span: right
+        tab: Слайдер на Главной странице
+
+        
+      email:
+        label: Электронный адрес
+        placeholder: email@gmail.com
+        span: left
+        tab: Контакты
+
+      phone:
+        label: Номер телефона
+        placeholder: +996 999 999 999
+        span: right
+        tab: Контакты
+
+      address:
+        label: Адрес
+        placeholder: Ул. Название 87
+        span: full
+        tab: Контакты
+
+     
+      social:
+        type: repeater
+        label: Cоциальные сети
+        titleFrom: name  
+        tab: Контакты
+        span: full
+        form:
+          fields:
+            awesome_icon:
+              label: Социальная сеть ( Иконка )
+              span: left
+              type: awesomeiconslist
+              unicodeValue: false
+              emptyOption: false
+              iconTypes: brands
+              placeholder: Выбрать иконку
+            url:
+              label: Ссылка социальной сети
+              span: right
+              type: text
+              placeholder: https://www.instagram.com/  
+
+      map:
+        label: Карта (ссылка карты)                
+        placeholder: https://maps.google.com/maps?q=university%20of%20san%20francisco&t=&z=13&ie=UTF8&iwloc=&output=embed
+        tab: Контакты

@@ -1,0 +1,4 @@
+title: Patients
+modelClass: Appointment\Patients\Models\Patient
+toolbar:
+    buttons: reorder_toolbar

@@ -1,0 +1,15 @@
+<p class="lead">
+    <strong>Забыли пароль?</strong> Без проблем! Введите свой адрес электронной почты, чтобы подтвердить свою учетную запись.
+</p>
+
+<form
+    data-request="{{ __SELF__ }}::onRestorePassword"
+    data-request-update="'{{ __SELF__ }}::reset': '#partialUserResetForm'">
+    <div class="form-group">
+        <div class="col-sm-12">
+        <input name="email" type="email" class="form-control form-control border-0" id="userRestoreEmail" placeholder="Введите ваш email" style="height: 55px; margin-bottom: 20px">
+        </div>
+    </div>
+
+     <button class="btn btn-primary w-100 py-3" type="submit">Сбросить пароль</button>
+</form>

@@ -1,0 +1,36 @@
+<div class="container-xxl py-5">
+        <div class="container">
+            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
+                <p class="d-inline-block border rounded-pill py-1 px-4">Врачи</p>
+                <h1>Наши опытные врачи</h1>
+            </div>
+            <div class="row g-4">
+               
+                {% for user in users %}
+
+                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="team-item position-relative rounded overflow-hidden">
+                            <div class="overflow-hidden">
+                                
+                                {% if user.avatar %}
+                                    <img class="img-fluid" src="{{user.avatar.path | resize(516, 600, { mode: 'crop', quality: '80', extension: 'webp' })}}" alt="">
+                                {% else %}
+                                    <img class="img-fluid" src="{{ 'assets/images/default-doctor.webp'|theme | resize(516, 600, { mode: 'crop', quality: '80', extension: 'webp' })}}" alt="">
+                                {% endif %}
+                            </div>
+                            <div class="team-text bg-light text-center p-4">
+                                <h5>{{ user.surname }} {{ user.name }} </h5>
+                                <p class="text-primary">{{ user.iu_job }}</p>
+                                <div class="team-social text-center">
+                                    <a class="btn btn-square" href="mailto:{{ user.email }}"><i class="fa fa-envelope"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    
+                {% endfor %}
+                
+            </div>
+        </div>
+    </div>

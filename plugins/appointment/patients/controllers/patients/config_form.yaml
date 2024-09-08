@@ -1,0 +1,10 @@
+name: Patients
+form: $/appointment/patients/models/patient/fields.yaml
+modelClass: Appointment\Patients\Models\Patient
+defaultRedirect: appointment/patients/patients
+create:
+    redirect: 'appointment/patients/patients/update/:id'
+    redirectClose: appointment/patients/patients
+update:
+    redirect: appointment/patients/patients
+    redirectClose: appointment/patients/patients

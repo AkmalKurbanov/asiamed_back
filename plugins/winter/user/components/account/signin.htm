@@ -1,0 +1,48 @@
+{{ form_ajax('onSignin') }}
+
+    <div class="bg-light rounded h-100 d-flex align-items-center p-5" style="padding-bottom: 0!important;">
+     <div class="row g-3">
+        <div class="col-sm-12">
+            <input
+            name="login"
+            type="text"
+            class="form-control border-0"
+            id="userSigninLogin"
+            placeholder="Введите ваш {{ loginAttributeLabel|lower }}" 
+            style="height: 55px;"
+            />
+          
+        </div>
+        <div class="col-sm-12">
+           <input
+            name="password"
+            type="password"
+            class="form-control  border-0"
+            id="userSigninPassword"
+            placeholder="Введите пароль" 
+             style="height: 55px;"
+            />
+            
+        </div>
+
+
+         
+         <div class="col-12">
+            <button class="btn btn-primary w-100 py-3" type="submit">Войти</button>
+        </div>
+
+     </div>
+     </div>
+
+
+    {% if rememberLoginMode == 'ask' %}
+    <div class="form-group">
+        <div class="checkbox">
+        <label><input name="remember" type="checkbox" value="1">Stay logged in</label>
+        </div>
+    </div>
+    {% endif %}
+
+    
+
+{{ form_close() }}

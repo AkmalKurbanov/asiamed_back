@@ -1,0 +1,27 @@
+fields:
+    name:
+        label: Заголовок
+        span: left
+        type: text
+    desc:
+        label: Описание
+        size: ''
+        span: right
+        type: textarea
+    image:
+        label: Картинка
+        mode: image
+        useCaption: true
+        thumbOptions:
+            mode: crop
+            extension: auto
+        span: auto
+        type: fileupload
+
+    icon:
+        label: 'Icon'
+        span: auto
+        type: awesomeiconslist
+        unicodeValue: false
+        emptyOption: false
+        iconTypes: brands    

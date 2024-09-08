@@ -1,0 +1,10 @@
+name: Services
+form: $/appointment/services/models/service/fields.yaml
+modelClass: Appointment\Services\Models\Service
+defaultRedirect: appointment/services/services
+create:
+    redirect: 'appointment/services/services/update/:id'
+    redirectClose: appointment/services/services
+update:
+    redirect: appointment/services/services
+    redirectClose: appointment/services/services
