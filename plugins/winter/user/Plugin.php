@@ -74,6 +74,8 @@ class Plugin extends PluginBase
             \Winter\User\Components\Account::class       => 'account',
             \Winter\User\Components\ResetPassword::class => 'resetPassword',
             \Winter\User\Components\UserList::class       => 'userlist',
+            \Winter\User\Components\DoctorManagement::class => 'doctorManagement',
+            \Winter\User\Components\PatientManagement::class => 'patientManagement'
             
         ];
     }

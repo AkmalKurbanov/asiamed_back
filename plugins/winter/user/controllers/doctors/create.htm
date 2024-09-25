@@ -1,0 +1,14 @@
+<form method="POST" action="{{ 'admin.doctors.store' }}">
+    {{ csrf_field() }}
+    <div>
+        <label for="name">Имя:</label>
+        <input type="text" name="name" required>
+    </div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" name="email" required>
+    </div>
+    <div>
+        <button type="submit">Создать врача</button>
+    </div>
+</form>

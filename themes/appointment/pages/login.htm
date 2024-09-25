@@ -1,9 +1,12 @@
-title = "Вход в личный кабинет"
-url = "/doctor"
+title = "Авторизация"
+url = "/login"
 layout = "default"
 is_hidden = 0
-==
 
+[session]
+security = "guest"
+redirect = "profile"
+==
 <!-- Appointment Start -->
     <div class="container-xxl py-5">
         <div class="container">
@@ -56,4 +59,3 @@ is_hidden = 0
 
 
     </div>
-

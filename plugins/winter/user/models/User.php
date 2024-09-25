@@ -532,4 +532,9 @@ class User extends UserBase
     {
         $this->password = $this->password_confirmation = Str::random(static::getMinPasswordLength());
     }
+
+    public function isInGroup($code)
+    {
+        return $this->groups()->where('code', $code)->exists();
+    }
 }

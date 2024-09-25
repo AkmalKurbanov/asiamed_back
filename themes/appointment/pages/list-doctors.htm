@@ -1,0 +1,78 @@
+title = "Список врачей"
+url = "/list-doctors"
+layout = "default"
+
+[doctorManagement]
+
+[session]
+security = "user"
+redirect = "/login"
+==
+
+<h2>Список врачей</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Email</th>
+            <th>Телефон</th>
+            <th>Должность</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for doctor in doctors %}
+        <tr>
+            <td>{{ doctor.name }}</td>
+            <td>{{ doctor.email }}</td>
+            <td>{{ doctor.iu_telephone }}</td>
+            <td>{{ doctor.iu_job }}</td>
+            <td>
+                <!-- Ссылка на страницу редактирования -->
+                <a href="{{ 'edit-doctor' | page({ id: doctor.id }) }}" class="btn btn-warning">Редактировать</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">Врачи не найдены.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="container-xxl py-5">
+  <div class="container">
+      <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px; visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
+          <p class="d-inline-block border rounded-pill py-1 px-4">Врачи</p>
+          <h1>Наши опытные врачи</h1>
+      </div>
+      <div class="row g-4">
+
+        {% for doctor in doctors %}
+          <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
+              <div class="team-item position-relative rounded overflow-hidden">
+                  <div class="overflow-hidden">
+                      <img class="img-fluid" src="img/team-1.jpg" alt="">
+                  </div>
+                  <div class="team-text bg-light text-center p-4">
+                      <h5>{{ doctor.name }} {{ doctor.surname }}</h5>
+                      <p class="text-primary">{{ doctor.iu_job }}</p>
+                      <div class="team-social text-center">
+                          <a href="{{ 'edit-doctor' | page({ id: doctor.id }) }}" class="btn btn-square"><i class="fas fa-pen"></i></a>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          {% else %}
+            Врачи не найдены.
+        {% endfor %}
+      
+      </div>
+  </div>
+</div>

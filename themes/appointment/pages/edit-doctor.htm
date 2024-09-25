@@ -1,0 +1,93 @@
+title = "Редактирование врача"
+url = "/edit-doctor/:id"
+layout = "default"
+
+[doctorManagement]
+
+[session]
+security = "user"
+redirect = "/login"
+==
+{% set doctor = doctorData %}
+
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
+                <p class="d-inline-block border rounded-pill py-1 px-4">Редактирование врача: {{ doctor.name }} {{ doctor.surname }}</p>
+                <h1 class="mb-4">Редактирование врача</h1>
+                <p class="mb-4">Если у вас возникли проблемы, пожалуйста, обратитесь к администратору</p>
+                <div class="bg-light rounded d-flex align-items-center p-5 mb-4">
+                    <div class="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-white" style="width: 55px; height: 55px;">
+                        <i class="fa fa-phone-alt text-primary"></i>
+                    </div>
+                    <div class="ms-4">
+                        <p class="mb-2">Телефон</p>
+                        <h5 class="mb-0">+996 999 999 999</h5>
+                    </div>
+                </div>
+                <div class="bg-light rounded d-flex align-items-center p-5">
+                    <div class="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-white" style="width: 55px; height: 55px;">
+                        <i class="fa fa-envelope-open text-primary"></i>
+                    </div>
+                    <div class="ms-4">
+                        <p class="mb-2">Email</p>
+                        <h5 class="mb-0">info@example.com</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
+                
+                
+    
+                  <div id="flash-message" style="position:fixed; top:90px; right:10px"></div>
+
+                  <form id="editDoctorForm" data-request="doctorManagement::onUpdateDoctor" data-request-data="doctor_id: '{{ doctor.id }}'" data-request-success="handleFormResponse(data, 'editDoctor')">
+                    <div class="bg-light rounded h-100 d-flex align-items-center p-5">
+                      <div class="row g-3">
+                        <div class="col-sm-12">
+                          <input class="form-control border-0" type="text" id="name" name="name" placeholder="Имя" value="{{ doctor.name }}" required style="height: 55px;">
+                        </div>
+
+                        <div class="col-sm-12">
+                          <input class="form-control border-0" type="text" id="surname" name="surname" placeholder="Фамилия" value="{{ doctor.surname }}" required style="height: 55px;">
+                        </div>
+
+                        <div class="col-sm-12">
+                          <input class="form-control border-0" type="email" id="email" name="email" placeholder="Email" value="{{ doctor.email }}" required style="height: 55px;">
+                        </div>
+
+                        <div class="col-sm-12">
+                          <input class="form-control border-0" type="text" id="iu_telephone" name="iu_telephone" placeholder="Телефон" value="{{ doctor.iu_telephone }}" required style="height: 55px;">
+                        </div>
+
+                        <div class="col-sm-12">
+                          <input class="form-control border-0" type="text" id="iu_job" name="iu_job" placeholder="Отделение (Специальность)" value="{{ doctor.iu_job }}" required style="height: 55px;">
+                        </div>
+
+                        <div class="col-sm-12">
+                          <input class="form-control border-0" type="password" id="password" name="password" placeholder="Новый пароль"  required style="height: 55px;">
+                        </div>
+
+                        <div class="col-sm-12">
+                          <input class="form-control border-0" type="password" id="password_confirmation" name="password_confirmation" placeholder="Подтверждение" required style="height: 55px;">
+                        </div>
+
+                        <div class="col-sm-12">
+                          <button type="submit" class="btn btn-primary w-100 py-3">Сохранить изменения</button>
+                        </div>
+                        </div>
+                    
+                  </form>
+                  <div id="flash-message" style="position:fixed; top:90px; right:0; z-index:10"></div>
+                  
+        
+              
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
