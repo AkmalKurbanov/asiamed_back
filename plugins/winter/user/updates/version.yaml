@@ -80,3 +80,21 @@
 2.0.1:
     - 'Created table winter_user_appointments'
     - builder_table_create_winter_user_appointments.php
+2.0.2:
+    - 'Created table winter_user_visit_histories'
+    - builder_table_create_winter_user_visit_histories.php
+2.0.3:
+    - 'Updated table winter_user_visit_histories'
+    - builder_table_update_winter_user_visit_histories.php
+2.0.4:
+    - 'Updated table winter_user_visit_histories'
+    - builder_table_update_winter_user_visit_histories_2.php
+2.0.5:
+    - 'Updated table winter_user_visit_histories'
+    - builder_table_update_winter_user_visit_histories_3.php
+2.0.6:
+    - 'Updated table winter_user_appointments'
+    - builder_table_update_winter_user_appointments.php
+2.0.7:
+    - 'Updated table winter_user_appointments'
+    - builder_table_update_winter_user_appointments_2.php

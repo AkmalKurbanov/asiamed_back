@@ -1,0 +1,117 @@
+title = "Редактирование пациента"
+url = "/edit-patient/:patient_id"
+layout = "default"
+is_hidden = 0
+
+[session]
+security = "user"
+allowedUserGroups[] = "admins"
+allowedUserGroups[] = "doctors"
+redirect = "/login"
+
+[patientManagement]
+patient_id = "{{ :patient_id }}"
+
+==
+{% set doctor = doctorData %}
+
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
+                <p class="d-inline-block border rounded-pill py-1 px-4">Редактирование пациента: {{ patient.name }} {{ patient.surname }}</p>
+                <h1 class="mb-4">Редактирование пациента</h1>
+                <p class="mb-4">Если у вас возникли проблемы, пожалуйста, обратитесь к администратору</p>
+                <div class="bg-light rounded d-flex align-items-center p-5 mb-4">
+                    <div class="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-white" style="width: 55px; height: 55px;">
+                        <i class="fa fa-phone-alt text-primary"></i>
+                    </div>
+                    <div class="ms-4">
+                        <p class="mb-2">Телефон</p>
+                        <h5 class="mb-0">+996 999 999 999</h5>
+                    </div>
+                </div>
+                <div class="bg-light rounded d-flex align-items-center p-5">
+                    <div class="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-white" style="width: 55px; height: 55px;">
+                        <i class="fa fa-envelope-open text-primary"></i>
+                    </div>
+                    <div class="ms-4">
+                        <p class="mb-2">Email</p>
+                        <h5 class="mb-0">info@example.com</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
+                
+                
+    
+                  <div id="flash-message" style="position:fixed; top:90px; right:10px"></div>
+
+                  <form id="editPatientForm" data-request="onUpdatePatient" data-request-success="handleFormResponse(data, 'editPatient')">
+                    <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                    <div class="bg-light rounded h-100 d-flex align-items-center p-5">
+                      <div class="row g-3">
+                        <div class="col-sm-12">
+                          <input class="form-control border-0" type="text" name="name" placeholder="Имя" value="{{ patient.name }}" required style="height: 55px;">
+                        </div>
+
+                        <div class="col-sm-12">
+                          <input class="form-control border-0" type="text" name="surname" placeholder="Фамилия" value="{{ patient.surname }}" required style="height: 55px;">
+                        </div>
+
+                        <div class="col-sm-12">
+                          <input class="form-control border-0" type="text" id="iu_telephone" name="iu_telephone" placeholder="Телефон" value="{{ patient.iu_telephone }}" required style="height: 55px;">
+                        </div>
+
+                        <div class="col-sm-12">
+                          <select id="doctor_id" name="doctor_id" required class="form-select border-0" style="height: 55px;">
+                            <option selected>Выберите врача</option>
+                            {% for doctor in patientManagement.loadDoctorsList() %}
+                                <option value="{{ doctor.id }}" {% if doctor.id == currentAppointment.doctor_id %} selected {% endif %}>{{ doctor.name }} {{ doctor.surname }} ({{doctor.iu_job}})</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+
+                        <div class="col-12 col-sm-6">
+                              <div class="input-group" id="datepicker">
+                                  <input type="text" id="appointment_date" name="appointment_date" class="form-control border-0" placeholder="Выберите дату" autocomplete="none" required style="height: 55px; cursor:pointer;" />
+                                  <div class="input-group-append" style="position: absolute; right:10px; top:50%; transform: translateY(-50%); pointer-events:none; ">
+                                      <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div class="col-12 col-sm-6">
+                              <div class="input-group">
+                                  <input type="text" id="appointment_time" name="appointment_time" class="form-control border-0" placeholder="Выберите время" autocomplete="none" required style="height: 55px; cursor:pointer;" />
+                                  <div class="input-group-append" style="position: absolute; right:10px; top:50%; transform: translateY(-50%); pointer-events:none;">
+                                      <div class="input-group-text"><i class="fa fa-clock"></i></div>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div class="col-12">
+                              <h5>Забронированное время:</h5>
+                              <ul id="booked_times" class="list-group">
+                                  <!-- Здесь будет выводиться забронированное время -->
+                              </ul>
+                          </div>
+
+                        <div class="col-sm-12">
+                          <button type="submit" class="btn btn-primary w-100 py-3">Сохранить изменения</button>
+                        </div>
+                        </div>
+                    
+                  </form>
+                  <div id="flash-message" style="position:fixed; top:90px; right:0; z-index:10"></div>
+                  
+        
+              
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

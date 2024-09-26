@@ -1,8 +1,8 @@
 /********** Template CSS **********/
 :root {
-    --primary: #0463FA;
-    --light: #EFF5FF;
-    --dark: #1B2C51;
+    --primary: #0463fa;
+    --light: #eff5ff;
+    --dark: #1b2c51;
 }
 
 .fw-medium {
@@ -25,31 +25,29 @@
     z-index: 99;
 }
 
-
 /*** Spinner ***/
 #spinner {
     opacity: 0;
     visibility: hidden;
-    transition: opacity .5s ease-out, visibility 0s linear .5s;
+    transition: opacity 0.5s ease-out, visibility 0s linear 0.5s;
     z-index: 99999;
 }
 
 #spinner.show {
-    transition: opacity .5s ease-out, visibility 0s linear 0s;
+    transition: opacity 0.5s ease-out, visibility 0s linear 0s;
     visibility: visible;
     opacity: 1;
 }
 
-
 /*** Button ***/
 .btn {
     font-weight: 500;
-    transition: .5s;
+    transition: 0.5s;
 }
 
 .btn.btn-primary,
 .btn.btn-secondary {
-    color: #FFFFFF;
+    color: #ffffff;
 }
 
 .btn-square {
@@ -77,7 +75,6 @@
     font-weight: normal;
 }
 
-
 /*** Navbar ***/
 .navbar .dropdown-toggle::after {
     border: none;
@@ -91,7 +88,7 @@
 .navbar .navbar-nav .nav-link {
     margin-right: 30px;
     padding: 25px 0;
-    color: #FFFFFF;
+    color: #ffffff;
     font-size: 15px;
     font-weight: 500;
     text-transform: uppercase;
@@ -104,13 +101,13 @@
 }
 
 @media (max-width: 991.98px) {
-    .navbar .navbar-nav .nav-link  {
+    .navbar .navbar-nav .nav-link {
         margin-right: 0;
         padding: 10px 0;
     }
 
     .navbar .navbar-nav {
-        border-top: 1px solid #EEEEEE;
+        border-top: 1px solid #eeeeee;
     }
 }
 
@@ -126,7 +123,7 @@
 
 .navbar.sticky-top {
     top: -100px;
-    transition: .5s;
+    transition: 0.5s;
 }
 
 @media (min-width: 992px) {
@@ -137,17 +134,16 @@
         top: 150%;
         opacity: 0;
         visibility: hidden;
-        transition: .5s;
+        transition: 0.5s;
     }
 
     .navbar .nav-item:hover .dropdown-menu {
         top: 100%;
         visibility: visible;
-        transition: .5s;
+        transition: 0.5s;
         opacity: 1;
     }
 }
-
 
 /*** Header ***/
 .header-carousel .owl-carousel-text {
@@ -160,7 +156,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    text-shadow: 0 0 30px rgba(0, 0, 0, .1);
+    text-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
 }
 
 .header-carousel .owl-nav {
@@ -181,12 +177,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #FFFFFF;
+    color: #ffffff;
     background: transparent;
-    border: 1px solid #FFFFFF;
+    border: 1px solid #ffffff;
     border-radius: 45px;
     font-size: 22px;
-    transition: .5s;
+    transition: 0.5s;
 }
 
 .header-carousel .owl-nav .owl-prev:hover,
@@ -213,9 +209,9 @@
     width: 15px;
     height: 15px;
     background: transparent;
-    border: 1px solid #FFFFFF;
+    border: 1px solid #ffffff;
     border-radius: 15px;
-    transition: .5s;
+    transition: 0.5s;
 }
 
 .header-carousel .owl-dot::after {
@@ -225,7 +221,7 @@
     height: 5px;
     top: 4px;
     left: 4px;
-    background: #FFFFFF;
+    background: #ffffff;
     border-radius: 5px;
 }
 
@@ -237,22 +233,21 @@
 .page-header {
     background: url(../images/header-page.jpg) top center no-repeat;
     background-size: cover;
-    text-shadow: 0 0 30px rgba(0, 0, 0, .1);
+    text-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
 }
 
 .breadcrumb-item + .breadcrumb-item::before {
     color: var(--light);
 }
 
-
 /*** Service ***/
 .service-item {
-    transition: .5s;
+    transition: 0.5s;
 }
 
 .service-item:hover {
     margin-top: -10px;
-    box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .08);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
 }
 
 .service-item .btn {
@@ -260,17 +255,16 @@
     height: 40px;
     display: inline-flex;
     align-items: center;
-    background: #FFFFFF;
+    background: #ffffff;
     border-radius: 40px;
     white-space: nowrap;
     overflow: hidden;
-    transition: .5s;
+    transition: 0.5s;
 }
 
 .service-item:hover .btn {
     width: 140px;
 }
-
 
 /*** Feature ***/
 @media (min-width: 992px) {
@@ -278,29 +272,28 @@
         max-width: 100% !important;
     }
 
-    .feature-text  {
-        padding-left: calc(((100% - 960px) / 2) + .75rem);
+    .feature-text {
+        padding-left: calc(((100% - 960px) / 2) + 0.75rem);
     }
 }
 
 @media (min-width: 1200px) {
-    .feature-text  {
-        padding-left: calc(((100% - 1140px) / 2) + .75rem);
+    .feature-text {
+        padding-left: calc(((100% - 1140px) / 2) + 0.75rem);
     }
 }
 
 @media (min-width: 1400px) {
-    .feature-text  {
-        padding-left: calc(((100% - 1320px) / 2) + .75rem);
+    .feature-text {
+        padding-left: calc(((100% - 1320px) / 2) + 0.75rem);
     }
 }
-
 
 /*** Team ***/
 .team-item img {
     position: relative;
     top: 0;
-    transition: .5s;
+    transition: 0.5s;
 }
 
 .team-item:hover img {
@@ -310,7 +303,7 @@
 .team-item .team-text {
     position: relative;
     height: 100px;
-    transition: .5s;
+    transition: 0.5s;
 }
 
 .team-item:hover .team-text {
@@ -318,9 +311,17 @@
     height: 160px;
 }
 
+.team-item_height-sm .team-text {
+    height: 80px!important;
+}
+.team-item_height-sm:hover .team-text {
+    margin-top: -30px!important;
+    height: 110px!important;
+}
+
 .team-item .team-text .team-social {
     opacity: 0;
-    transition: .5s;
+    transition: 0.5s;
 }
 
 .team-item:hover .team-text .team-social {
@@ -330,15 +331,14 @@
 .team-item .team-social .btn {
     display: inline-flex;
     color: var(--primary);
-    background: #FFFFFF;
+    background: #ffffff;
     border-radius: 40px;
 }
 
 .team-item .team-social .btn:hover {
-    color: #FFFFFF;
+    color: #ffffff;
     background: var(--primary);
 }
-
 
 /*** Appointment ***/
 .bootstrap-datetimepicker-widget.bottom {
@@ -367,7 +367,6 @@
     border-bottom-color: var(--primary);
 }
 
-
 /*** Testimonial ***/
 .testimonial-carousel::before {
     position: absolute;
@@ -376,7 +375,11 @@
     left: 0;
     height: 100%;
     width: 0;
-    background: linear-gradient(to right, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 1) 0%,
+        rgba(255, 255, 255, 0) 100%
+    );
     z-index: 1;
 }
 
@@ -387,7 +390,11 @@
     right: 0;
     height: 100%;
     width: 0;
-    background: linear-gradient(to left, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(
+        to left,
+        rgba(255, 255, 255, 1) 0%,
+        rgba(255, 255, 255, 0) 100%
+    );
     z-index: 1;
 }
 
@@ -407,8 +414,8 @@
 
 .testimonial-carousel .owl-item .testimonial-text {
     background: var(--light);
-    transform: scale(.8);
-    transition: .5s;
+    transform: scale(0.8);
+    transition: 0.5s;
 }
 
 .testimonial-carousel .owl-item.center .testimonial-text {
@@ -418,7 +425,7 @@
 
 .testimonial-carousel .owl-item .testimonial-text *,
 .testimonial-carousel .owl-item .testimonial-item img {
-    transition: .5s;
+    transition: 0.5s;
 }
 
 .testimonial-carousel .owl-item.center .testimonial-text * {
@@ -427,7 +434,7 @@
 
 .testimonial-carousel .owl-item.center .testimonial-item img {
     background: var(--primary) !important;
-} 
+}
 
 .testimonial-carousel .owl-nav {
     position: absolute;
@@ -438,7 +445,7 @@
     display: flex;
     justify-content: space-between;
     opacity: 0;
-    transition: .5s;
+    transition: 0.5s;
     z-index: 1;
 }
 
@@ -452,14 +459,13 @@
     position: relative;
     color: var(--primary);
     font-size: 45px;
-    transition: .5s;
+    transition: 0.5s;
 }
 
 .testimonial-carousel .owl-nav .owl-prev:hover,
 .testimonial-carousel .owl-nav .owl-next:hover {
     color: var(--dark);
 }
-
 
 /*** Footer ***/
 .footer .btn.btn-social {
@@ -470,8 +476,8 @@
     align-items: center;
     justify-content: center;
     color: var(--light);
-    border: 1px solid #FFFFFF;
-    transition: .3s;
+    border: 1px solid #ffffff;
+    transition: 0.3s;
 }
 
 .footer .btn.btn-social:hover {
@@ -483,11 +489,11 @@
     margin-bottom: 5px;
     padding: 0;
     text-align: left;
-    color: #FFFFFF;
+    color: #ffffff;
     font-size: 15px;
     font-weight: normal;
     text-transform: capitalize;
-    transition: .3s;
+    transition: 0.3s;
 }
 
 .footer .btn.btn-link::before {
@@ -507,7 +513,7 @@
 .footer .copyright {
     padding: 25px 0;
     font-size: 15px;
-    border-top: 1px solid rgba(256, 256, 256, .1);
+    border-top: 1px solid rgba(256, 256, 256, 0.1);
 }
 
 .footer .copyright a {

@@ -1,3 +1,6 @@
+[doctorManagement]
+==
+
 <div class="container-xxl py-5">
         <div class="container">
             <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
@@ -6,23 +9,24 @@
             </div>
             <div class="row g-4">
                
-                {% for user in users %}
+                {% for doctor in doctors %}
 
                     <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                        <div class="team-item position-relative rounded overflow-hidden">
+                        <div class="team-item team-item_height-sm position-relative rounded overflow-hidden">
                             <div class="overflow-hidden">
                                 
-                                {% if user.avatar %}
-                                    <img class="img-fluid" src="{{user.avatar.path | resize(516, 600, { mode: 'crop', quality: '80', extension: 'webp' })}}" alt="">
+                                {% if doctor.avatar %}
+                                    <img class="img-fluid" src="{{doctor.avatar.path | resize(516, 600, { mode: 'crop', quality: '80', extension: 'webp' })}}" alt="">
                                 {% else %}
                                     <img class="img-fluid" src="{{ 'assets/images/default-doctor.webp'|theme | resize(516, 600, { mode: 'crop', quality: '80', extension: 'webp' })}}" alt="">
                                 {% endif %}
                             </div>
                             <div class="team-text bg-light text-center p-4">
-                                <h5>{{ user.surname }} {{ user.name }} </h5>
-                                <p class="text-primary">{{ user.iu_job }}</p>
+                                <h5>{{ doctor.name }} {{ doctor.surname }}</h5>
+                                {# <p class="text-primary">{{ doctor.iu_job }}</p> #}
                                 <div class="team-social text-center">
-                                    <a class="btn btn-square" href="mailto:{{ user.email }}"><i class="fa fa-envelope"></i></a>
+                                <p class="text-primary">{{ doctor.iu_job }}</p>
+                                    {# <a class="btn btn-square" href="mailto:{{ user.email }}"><i class="fa fa-envelope"></i></a> #}
                                 </div>
                             </div>
                         </div>

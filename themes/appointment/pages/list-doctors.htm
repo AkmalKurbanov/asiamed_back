@@ -9,45 +9,54 @@ security = "user"
 redirect = "/login"
 ==
 
-<h2>Список врачей</h2>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Имя</th>
-            <th>Email</th>
-            <th>Телефон</th>
-            <th>Должность</th>
-            <th>Действия</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for doctor in doctors %}
-        <tr>
-            <td>{{ doctor.name }}</td>
-            <td>{{ doctor.email }}</td>
-            <td>{{ doctor.iu_telephone }}</td>
-            <td>{{ doctor.iu_job }}</td>
-            <td>
-                <!-- Ссылка на страницу редактирования -->
-                <a href="{{ 'edit-doctor' | page({ id: doctor.id }) }}" class="btn btn-warning">Редактировать</a>
-            </td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="5">Врачи не найдены.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-
-
-
-
 
 <div class="container-xxl py-5">
   <div class="container">
+    <h2>Вид списка</h2>
+    <div class="btn btn-warning table-visible-js">Таблица</div>
+    <div class="btn btn-warning tile-visible-js">Плитка</div>
+    
+    <br>
+    <br>
+    <br>
+    <br>
+
+      <div class="table-list">
+      <h2>Список врачей</h2>
+
+      <table class="table">
+          <thead>
+              <tr>
+                  <th>Имя</th>
+                  <th>Фамилия</th>
+                  <th>Email</th>
+                  <th>Телефон</th>
+                  <th>Должность</th>
+                  <th>Действия</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for doctor in doctors %}
+              <tr>
+                  <td>{{ doctor.name }}</td>
+                  <td>{{ doctor.surname }}</td>
+                  <td>{{ doctor.email }}</td>
+                  <td>{{ doctor.iu_telephone }}</td>
+                  <td>{{ doctor.iu_job }}</td>
+                  <td>
+                      <!-- Ссылка на страницу редактирования -->
+                      <a href="{{ 'edit-doctor' | page({ id: doctor.id }) }}" class="btn btn-warning">Редактировать</a>
+                  </td>
+              </tr>
+              {% else %}
+              <tr>
+                  <td colspan="5">Врачи не найдены.</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+      </div>
+    <div class="tile-list" style="display:none">
       <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px; visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
           <p class="d-inline-block border rounded-pill py-1 px-4">Врачи</p>
           <h1>Наши опытные врачи</h1>
@@ -58,7 +67,11 @@ redirect = "/login"
           <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
               <div class="team-item position-relative rounded overflow-hidden">
                   <div class="overflow-hidden">
-                      <img class="img-fluid" src="img/team-1.jpg" alt="">
+                      {% if doctor.avatar %}
+                          <img class="img-fluid" src="{{doctor.avatar.path | resize(516, 600, { mode: 'crop', quality: '80', extension: 'webp' })}}" alt="">
+                      {% else %}
+                          <img class="img-fluid" src="{{ 'assets/images/default-doctor.webp'|theme | resize(516, 600, { mode: 'crop', quality: '80', extension: 'webp' })}}" alt="">
+                      {% endif %}
                   </div>
                   <div class="team-text bg-light text-center p-4">
                       <h5>{{ doctor.name }} {{ doctor.surname }}</h5>
@@ -75,4 +88,5 @@ redirect = "/login"
       
       </div>
   </div>
+</div>
 </div>

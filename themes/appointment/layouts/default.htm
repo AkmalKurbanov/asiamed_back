@@ -35,9 +35,11 @@ redirect = "login"
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
         <!-- Libraries Stylesheet -->
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="https://weareoutman.github.io/clockpicker/dist/jquery-clockpicker.min.css">
         <link href="{{ 'assets/lib/animate/animate.min.css'|theme }}" rel="stylesheet">
         <link href="{{ 'assets/lib/owlcarousel/assets/owl.carousel.min.css'|theme }}" rel="stylesheet">
-        <link href="{{ 'assets/lib/tempusdominus/css/tempusdominus-bootstrap-4.min.css'|theme }}" rel="stylesheet" />
+       
         <!-- Customized Bootstrap Stylesheet -->
         <link href="{{ 'assets/css/bootstrap.min.css'|theme }}" rel="stylesheet">
 
@@ -167,97 +169,28 @@ redirect = "login"
 
        
         <!-- JavaScript Libraries -->
-        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script src="{{ 'assets/javascript/datepicker-ru.js'|theme }}"></script>
+        <script src="https://weareoutman.github.io/clockpicker/dist/jquery-clockpicker.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="{{ 'assets/lib/wow/wow.min.js'|theme }}"></script>
         <script src="{{ 'assets/lib/easing/easing.min.js'|theme }}"></script>
         <script src="{{ 'assets/lib/waypoints/waypoints.min.js'|theme }}"></script>
         <script src="{{ 'assets/lib/counterup/counterup.min.js'|theme }}"></script>
         <script src="{{ 'assets/lib/owlcarousel/owl.carousel.min.js'|theme }}"></script>
-        <script src="{{ 'assets/lib/tempusdominus/js/moment.min.js'|theme }}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/locale/ru.js"></script>
-        <script src="{{ 'assets/lib/tempusdominus/js/moment-timezone.min.js'|theme }}"></script>
-        <script src="{{ 'assets/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js'|theme }}"></script>
-    
-        <!-- Template Javascript -->
+        
+
+
+        
+
+      <!-- Template Javascript -->
         <script src="{{ 'assets/javascript/main.js'|theme }}"></script>
-
-
-        <script>
-          function handleFormResponse(data, formType) {
-            // Выведем ответ в консоль для проверки
-            console.log('Ответ от сервера:', data);
-
-            // Проверка на ошибки
-            if (data.error) {
-                // Выводим сообщение об ошибке
-                $('#flash-message').html('<div class="alert alert-danger">' + data.message + '</div>');
-            } else {
-                // Выводим сообщение об успехе
-                $('#flash-message').html('<div class="alert alert-success">' + data.message + '</div>');
-
-                // Сбрасываем форму для создания врача или пациента
-                if (formType === 'createDoctor') {
-                    $('#doctorForm')[0].reset();
-                } else if (formType === 'createPatient') {
-                    $('#patientForm')[0].reset();
-                }
-            }
-
-            // Убираем сообщение через 5 секунд
-            setTimeout(function() {
-                $('#flash-message').html('');
-            }, 5000);
-          }
-
-
-          $(function () {
-            // Устанавливаем русскую локализацию для Moment.js
-            moment.locale('ru');
-
-            // Инициализация DateTimePicker с русской локализацией
-            $('#datepicker').datetimepicker({
-              format: 'DD.MM.YYYY HH:mm', // Формат даты и времени на русском
-              locale: 'ru',  // Локализация на русский
-              icons: {
-                  time: 'fa fa-clock',
-                  date: 'fa fa-calendar',
-                  up: 'fa fa-chevron-up',
-                  down: 'fa fa-chevron-down',
-                  previous: 'fa fa-chevron-left',
-                  next: 'fa fa-chevron-right',
-                  today: 'fa fa-calendar-check-o',
-                  clear: 'fa fa-trash',
-                  close: 'fa fa-times'
-              }
-            });
-          });
-
-          $('#timepicker').datetimepicker({
-            format: 'HH:mm',  // Формат времени (часы:минуты)
-            locale: 'ru',
-            icons: {
-                time: 'fa fa-clock',
-                up: 'fa fa-chevron-up',
-                down: 'fa fa-chevron-down',
-                previous: 'fa fa-chevron-left',
-                next: 'fa fa-chevron-right',
-                today: 'fa fa-calendar-check-o',
-                clear: 'fa fa-trash',
-                close: 'fa fa-times'
-            },
-            // Включаем только часы и минуты, без даты
-            pickDate: false
-        });
-
-
-           
-      </script>
+        <script src="{{ 'assets/javascript/custom.js'|theme }}"></script>
 
 
         {% snowboard all %}
         {% framework %}
-        
         
         
         {% scripts %}

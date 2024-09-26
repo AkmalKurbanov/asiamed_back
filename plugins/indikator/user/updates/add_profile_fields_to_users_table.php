@@ -21,6 +21,7 @@ class AddProfileFieldsToUsersTable extends Migration
             $table->string('iu_skype', 50)->nullable();
             $table->string('iu_icq', 8)->nullable();
             $table->string('iu_comment')->nullable();
+            $table->boolean('is_active')->default(1);
         });
     }
 
@@ -30,7 +31,7 @@ class AddProfileFieldsToUsersTable extends Migration
         {
             $table->dropColumn([
                 'iu_first_name', 'iu_last_name', 'iu_gender', 'iu_job', 'iu_about', 'iu_webpage', 'iu_blog',
-                'iu_facebook', 'iu_twitter', 'iu_skype', 'iu_icq', 'iu_comment'
+                'iu_facebook', 'iu_twitter', 'iu_skype', 'iu_icq', 'iu_comment', 'is_active'
             ]);
         });
     }
