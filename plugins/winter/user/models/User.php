@@ -17,24 +17,24 @@ class User extends UserBase
     /**
      * @var string The database table used by the model.
      */
-    protected $table = 'users';
+    protected $table = 'winter_user_users';
 
     /**
      * Validation rules
      */
     public $rules = [
-        'email'    => 'required|between:6,255|email|unique:users',
-        'avatar'   => 'nullable|image|max:4000',
-        'username' => 'required|between:2,255|unique:users',
-        'password' => 'required:create|between:8,255|confirmed',
-        'password_confirmation' => 'required_with:password|between:8,255',
-    ];
+    'email'    => 'required|between:6,255|email|unique:winter_user_users',
+    'avatar'   => 'nullable|image|max:4000',
+    'username' => 'required|between:2,255|unique:winter_user_users',
+    'password' => 'required:create|between:8,255|confirmed',
+    'password_confirmation' => 'required_with:password|between:8,255',
+];
 
     /**
      * @var array Relations
      */
     public $belongsToMany = [
-        'groups' => [UserGroup::class, 'table' => 'users_groups'],
+        'groups' => [UserGroup::class, 'table' => 'winter_user_users_groups'],
         // 'patients' => [
         //     'Appointment\Patients\Models\Patient',
         //      'table'    => 'appointment_patients_doctor',

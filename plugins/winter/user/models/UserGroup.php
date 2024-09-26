@@ -14,7 +14,7 @@ class UserGroup extends GroupBase
     /**
      * @var string The database table used by the model.
      */
-    protected $table = 'user_groups';
+    protected $table = 'winter_user_groups';
 
     /**
      * Validation rules
@@ -28,8 +28,8 @@ class UserGroup extends GroupBase
      * @var array Relations
      */
     public $belongsToMany = [
-        'users'       => [User::class, 'table' => 'users_groups'],
-        'users_count' => [User::class, 'table' => 'users_groups', 'count' => true]
+        'users'       => [User::class, 'table' => 'winter_user_users_groups'],
+        'users_count' => [User::class, 'table' => 'winter_user_users_groups', 'count' => true]
     ];
 
     /**

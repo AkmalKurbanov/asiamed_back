@@ -1,7 +1,0 @@
-<ul>
-    {% for date in appointmentDates %}
-        <li>{{ date|date('d.m.Y H:i') }}</li>
-    {% else %}
-        <li>Записей нет.</li>
-    {% endfor %}
-</ul>

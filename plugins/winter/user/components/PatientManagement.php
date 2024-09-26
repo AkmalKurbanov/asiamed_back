@@ -151,7 +151,9 @@ class PatientManagement extends ComponentBase
         $doctorGroup = UserGroup::where('code', 'doctors')->first();
         return User::whereHas('groups', function ($query) use ($doctorGroup) {
             $query->where('id', $doctorGroup->id);
-        })->get();
+        })
+        ->where('is_active', true) // Фильтруем только активных врачей
+        ->get();
     }
 
     public function onUpdatePatient()
@@ -225,5 +227,33 @@ class PatientManagement extends ComponentBase
         })
     ];
 }
+
+public function onSearchPatients()
+{
+    $query = post('search_query');
+
+    if (empty($query)) {
+        $this->page['patients'] = User::whereHas('groups', function ($q) {
+            $q->where('code', 'patients');
+        })->get();
+    } else {
+        $this->page['patients'] = User::whereHas('groups', function ($q) {
+            $q->where('code', 'patients');
+        })
+        ->where(function ($q) use ($query) {
+            $q->where('name', 'like', '%' . $query . '%')
+              ->orWhere('surname', 'like', '%' . $query . '%')
+              ->orWhere('iu_telephone', 'like', '%' . $query . '%');
+        })
+        ->get();
+    }
+
+    // Обновляем partial с пациентами
+    return ['#patient_list' => $this->renderPartial('patient_list', ['patients' => $this->page['patients']])];
+}
+
+
+
+
 
 }

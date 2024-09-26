@@ -1,0 +1,15 @@
+{% for patient in patients %}
+<tr>
+    <td>{{ patient.name }}</td>
+    <td>{{ patient.surname }}</td>
+    <td>{{ patient.iu_telephone }}</td>
+    <td>
+        <!-- Ссылка на страницу редактирования пациента -->
+        <a href="{{ 'edit-patient' | page({ patient_id: patient.id }) }}" class="btn btn-warning">Редактировать</a>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="4">Пациенты не найдены.</td>
+</tr>
+{% endfor %}

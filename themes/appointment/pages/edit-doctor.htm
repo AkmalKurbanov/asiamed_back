@@ -16,25 +16,16 @@ redirect = "/login"
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
                 <p class="d-inline-block border rounded-pill py-1 px-4">Редактирование врача: {{ doctor.name }} {{ doctor.surname }}</p>
                 <h1 class="mb-4">Редактирование врача</h1>
-                <p class="mb-4">Если у вас возникли проблемы, пожалуйста, обратитесь к администратору</p>
-                <div class="bg-light rounded d-flex align-items-center p-5 mb-4">
-                    <div class="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-white" style="width: 55px; height: 55px;">
-                        <i class="fa fa-phone-alt text-primary"></i>
-                    </div>
-                    <div class="ms-4">
-                        <p class="mb-2">Телефон</p>
-                        <h5 class="mb-0">+996 999 999 999</h5>
-                    </div>
-                </div>
-                <div class="bg-light rounded d-flex align-items-center p-5">
-                    <div class="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-white" style="width: 55px; height: 55px;">
-                        <i class="fa fa-envelope-open text-primary"></i>
-                    </div>
-                    <div class="ms-4">
-                        <p class="mb-2">Email</p>
-                        <h5 class="mb-0">info@example.com</h5>
-                    </div>
-                </div>
+                
+                {% partial 'site/help' %}
+                <br>
+                <ul>
+                  <li>Зарегистрирован: {{ doctor.created_at | date('d.m.Y') }} </li>
+                  <li>Активирован: {{ doctor.activated_at | date('d.m.Y') }} </li>
+                  <li>Обновлен: {{ doctor.updated_at | date('d.m.Y') }} </li>
+                  
+                </ul>
+
             </div>
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
                 
@@ -72,6 +63,12 @@ redirect = "/login"
                         <div class="col-sm-12">
                           <input class="form-control border-0" type="password" id="password_confirmation" name="password_confirmation" placeholder="Подтверждение пароля" required style="height: 55px;">
                         </div>
+
+                        <div class="form-group">
+                          <input type="checkbox" id="is_active" name="is_active" value="1" {% if doctor.is_active %}checked{% endif %}>
+                          <label for="is_active" style="margin-left: 10px">Активный врач</label>
+                      </div>
+                                            
 
                         <div class="col-sm-12">
                           <button type="submit" class="btn btn-primary w-100 py-3">Сохранить изменения</button>

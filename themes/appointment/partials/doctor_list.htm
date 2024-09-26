@@ -1,0 +1,24 @@
+{% for doctor in doctors %}
+<tr>
+    <td>{{ doctor.name }}</td>
+    <td>{{ doctor.surname }}</td>
+    <td>{{ doctor.email }}</td>
+    <td>{{ doctor.iu_telephone }}</td>
+    <td>{{ doctor.iu_job }}</td>
+    <td>
+        {% if doctor.is_active == true %}
+          Активен
+          {% else %}
+          Неактивен
+        {% endif %}
+    </td>
+    <td>
+        <!-- Ссылка на страницу редактирования -->
+        <a href="{{ 'edit-doctor' | page({ id: doctor.id }) }}" class="btn btn-warning">Редактировать</a>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td colspan="5">Врачи не найдены.</td>
+</tr>
+{% endfor %}

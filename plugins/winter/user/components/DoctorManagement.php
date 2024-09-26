@@ -7,9 +7,12 @@ use Winter\User\Models\UserGroup;
 use Auth;
 use ApplicationException;
 use Flash;
+use Carbon\Carbon;
 
 class DoctorManagement extends ComponentBase
 {
+    
+
     public function componentDetails()
     {
         return [
@@ -21,6 +24,9 @@ class DoctorManagement extends ComponentBase
     // Метод для отображения списка врачей
     public function onRun()
     {
+         // Устанавливаем локализацию Carbon на русский
+        Carbon::setLocale('ru');  
+        
         // Проверка, если это страница редактирования врача
         if ($this->param('id')) {
             $this->loadDoctorData();  // Загружаем данные врача для редактирования
@@ -93,6 +99,8 @@ class DoctorManagement extends ComponentBase
     // Метод для загрузки данных врача на страницу редактирования
     protected function loadDoctorData()
     {
+       
+    
         // Получаем ID врача из URL
         $doctorId = $this->param('id');
 
@@ -138,6 +146,7 @@ class DoctorManagement extends ComponentBase
         $doctor->email = $data['email'];
         $doctor->iu_telephone = $data['iu_telephone'];
         $doctor->iu_job = $data['iu_job'];
+        $doctor->is_active = isset($data['is_active']) ? true : false;
 
         // Если пароль изменён, обновляем его
         if (!empty($data['password'])) {
@@ -157,4 +166,32 @@ class DoctorManagement extends ComponentBase
             'message' => 'Данные врача успешно обновлены.'
         ];
     }
+   
+ public function onSearchDoctors()
+{
+    $query = post('search_query');
+
+    if (empty($query)) {
+        $this->page['doctors'] = User::whereHas('groups', function ($q) {
+            $q->where('code', 'doctors');
+        })->get();
+    } else {
+        $this->page['doctors'] = User::whereHas('groups', function ($q) {
+            $q->where('code', 'doctors');
+        })
+        ->where(function ($q) use ($query) {
+            $q->where('name', 'like', '%' . $query . '%')
+              ->orWhere('surname', 'like', '%' . $query . '%')
+              ->orWhere('iu_telephone', 'like', '%' . $query . '%');
+        })
+        ->get();
+    }
+
+    // Обновляем partial с врачами
+    return ['#doctor_list' => $this->renderPartial('doctor_list', ['doctors' => $this->page['doctors']])];
+}
+
+
+
+
 }

@@ -12,25 +12,9 @@ is_hidden = 0
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
                 <p class="d-inline-block border rounded-pill py-1 px-4">Создание пациента</p>
                 <h1 class="mb-4">Создание пациента</h1>
-                <p class="mb-4">Если у вас возникли проблемы, пожалуйста, обратитесь к администратору</p>
-                <div class="bg-light rounded d-flex align-items-center p-5 mb-4">
-                    <div class="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-white" style="width: 55px; height: 55px;">
-                        <i class="fa fa-phone-alt text-primary"></i>
-                    </div>
-                    <div class="ms-4">
-                        <p class="mb-2">Телефон</p>
-                        <h5 class="mb-0">+996 999 999 999</h5>
-                    </div>
-                </div>
-                <div class="bg-light rounded d-flex align-items-center p-5">
-                    <div class="d-flex flex-shrink-0 align-items-center justify-content-center rounded-circle bg-white" style="width: 55px; height: 55px;">
-                        <i class="fa fa-envelope-open text-primary"></i>
-                    </div>
-                    <div class="ms-4">
-                        <p class="mb-2">Email</p>
-                        <h5 class="mb-0">info@example.com</h5>
-                    </div>
-                </div>
+                
+                {% partial 'site/help' %}
+            
             </div>
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
                 
@@ -55,11 +39,11 @@ is_hidden = 0
 
                           <div class="col-sm-12">
                               <select id="doctor_id" name="doctor_id" required class="form-select border-0" style="height: 55px;">
-                                  <option selected disabled>Выберите врача</option>
-                                  {% for doctor in patientManagement.loadDoctorsList() %}
-                                  <option value="{{ doctor.id }}">{{ doctor.name }} {{ doctor.surname }} ({{doctor.iu_job}})</option>
-                                  {% endfor %}
-                              </select>
+                                <option selected="">Выберите врача</option>
+                                {% for doctor in patientManagement.loadDoctorsList() %}
+                                    <option value="{{ doctor.id }}">{{ doctor.name }} {{ doctor.surname }} ({{doctor.iu_job}})</option>
+                                {% endfor %}
+                            </select>
                           </div>
 
                           <div class="col-12 col-sm-6">

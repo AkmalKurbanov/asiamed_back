@@ -186,3 +186,37 @@ $(".table-visible-js").on('click', function(){
     $(".tile-list").hide();
     $(".table-list").show();
 });
+
+
+
+
+
+
+
+
+// скрипт для динамического поиска
+$(document).ready(function () {
+    // Обработчик ввода в поле поиска
+    $("#patient_search").on("keyup", function () {
+        var query = $(this).val(); // Получаем введенный текст
+
+        // Выполняем Ajax-запрос на поиск пациентов
+        $.request("onSearchPatients", {
+            data: { search_query: query }, // Отправляем введенный запрос
+            update: { patient_list: "#patient_list" }, // Обновляем partial 'patient_list'
+        });
+    });
+});
+$(document).ready(function () {
+    // Обработчик ввода в поле поиска
+    $("#doctor_search").on("keyup", function () {
+        var query = $(this).val(); // Получаем введенный текст
+
+        // Выполняем Ajax-запрос на поиск пациентов
+        $.request("onSearchDoctors", {
+            data: { search_query: query }, // Отправляем введенный запрос
+            update: { patient_list: "#doctor_list" }, // Обновляем partial 'patient_list'
+        });
+    });
+});
+
