@@ -1,0 +1,12 @@
+{% if visit_histories is not empty %}
+    <ul>
+    {% for visit in visit_histories %}
+        <li>
+            <strong>Дата визита:</strong> {{ visit.visit_date|date('d.m.Y H:i') }}<br>
+            <strong>Заметки:</strong> {{ visit.notes }}
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>История посещений отсутствует.</p>
+{% endif %}

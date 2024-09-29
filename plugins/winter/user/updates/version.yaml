@@ -146,3 +146,12 @@
 2.0.23:
     - 'Updated table winter_user_visit_histories'
     - builder_table_update_winter_user_visit_histories_7.php
+2.0.24:
+    - 'Updated table winter_user_appointments'
+    - builder_table_update_winter_user_appointments_3.php
+2.0.25:
+    - 'Updated table winter_user_appointments'
+    - builder_table_update_winter_user_appointments_4.php
+2.0.26:
+    - 'Updated table winter_user_visit_histories'
+    - builder_table_update_winter_user_visit_histories_8.php

@@ -13,7 +13,7 @@ redirect = "/login"
 patient_id = "{{ :patient_id }}"
 
 ==
-{% set doctor = doctorData %}
+
 
 <div class="container-xxl py-5">
     <div class="container">
@@ -24,14 +24,21 @@ patient_id = "{{ :patient_id }}"
                 
                 {% partial 'site/help' %}
 
-                
+                <br>
+                <ul>
+                  <li>Зарегистрирован: {{ patient.created_at | date('d.m.Y') }} </li>
+                  <li>Активирован: {{ patient.activated_at | date('d.m.Y') }} </li>
+                  <li>Обновлен: {{ patient.updated_at | date('d.m.Y') }} </li>
+                  {{ appointment_time|date('H:i') }}
+                  {{ appointment.appointment_date|date('d.m.Y') }}
+                </ul>
+
             </div>
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
                 
                 
     
-                  <div id="flash-message" style="position:fixed; top:90px; right:10px"></div>
-
+                  <div id="flash-message" style="position:fixed; top:90px; right:10px; z-index:1021"></div>
                   <form id="editPatientForm" data-request="onUpdatePatient" data-request-success="handleFormResponse(data, 'editPatient')">
                     <input type="hidden" name="patient_id" value="{{ patient.id }}">
                     <div class="bg-light rounded h-100 d-flex align-items-center p-5">
@@ -59,7 +66,7 @@ patient_id = "{{ :patient_id }}"
 
                         <div class="col-12 col-sm-6">
                               <div class="input-group" id="datepicker">
-                                  <input type="text" id="appointment_date" name="appointment_date" class="form-control border-0" placeholder="Выберите дату" autocomplete="none" required style="height: 55px; cursor:pointer;" />
+                                  <input type="text" id="appointment_date" name="appointment_date" class="form-control border-0" placeholder="Выберите дату" autocomplete="off" required style="height: 55px; cursor:pointer;" />
                                   <div class="input-group-append" style="position: absolute; right:10px; top:50%; transform: translateY(-50%); pointer-events:none; ">
                                       <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                   </div>
@@ -68,7 +75,7 @@ patient_id = "{{ :patient_id }}"
 
                           <div class="col-12 col-sm-6">
                               <div class="input-group">
-                                  <input type="text" id="appointment_time" name="appointment_time" class="form-control border-0" placeholder="Выберите время" autocomplete="none" required style="height: 55px; cursor:pointer;" />
+                                  <input type="text" id="appointment_time" name="appointment_time" class="form-control border-0" placeholder="Выберите время" autocomplete="off" required style="height: 55px; cursor:pointer;" />
                                   <div class="input-group-append" style="position: absolute; right:10px; top:50%; transform: translateY(-50%); pointer-events:none;">
                                       <div class="input-group-text"><i class="fa fa-clock"></i></div>
                                   </div>
@@ -88,7 +95,6 @@ patient_id = "{{ :patient_id }}"
                         </div>
                     
                   </form>
-                  <div id="flash-message" style="position:fixed; top:90px; right:0; z-index:10"></div>
                   
         
               

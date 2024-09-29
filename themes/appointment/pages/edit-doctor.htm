@@ -31,8 +31,7 @@ redirect = "/login"
                 
                 
     
-                  <div id="flash-message" style="position:fixed; top:90px; right:10px"></div>
-
+                  <div id="flash-message" style="position:fixed; top:90px; right:10px; z-index:1021"></div>
                   <form id="editDoctorForm" data-request="doctorManagement::onUpdateDoctor" data-request-data="doctor_id: '{{ doctor.id }}'" data-request-success="handleFormResponse(data, 'editDoctor')">
                     <div class="bg-light rounded h-100 d-flex align-items-center p-5">
                       <div class="row g-3">
@@ -76,9 +75,7 @@ redirect = "/login"
                         </div>
                     
                   </form>
-                  <div id="flash-message" style="position:fixed; top:90px; right:0; z-index:10"></div>
                   
-        
               
 
 

@@ -44,12 +44,9 @@ class User extends UserBase
     ];
     
     public $hasMany = [
-        'patients' => [
-            'Appointment\Patients\Models\Patient',
-            'table'    => 'appointment_patients_doctor',
-            'key' => 'doctor_id',
-        ]
-    ];
+    'appointments' => 'Winter\User\Models\Appointment', // Связь с записями на прием
+    'visit_histories' => 'Winter\User\Models\VisitHistory' // Связь с историей посещений (если есть)
+];
 
     public $attachOne = [
         'avatar' => \System\Models\File::class
@@ -537,4 +534,13 @@ class User extends UserBase
     {
         return $this->groups()->where('code', $code)->exists();
     }
+
+    public function appointments()
+{
+    return $this->hasMany(Appointment::class, 'patient_id');
+}
+    public function visit_histories()
+{
+    return $this->hasMany(VisitHistory::class, 'patient_id');
+}
 }

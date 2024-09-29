@@ -11,6 +11,7 @@ use ApplicationException;
 use Flash;
 use Carbon\Carbon;
 use Winter\User\Models\Appointment;
+use Winter\User\Models\VisitHistory;
 
 class PatientManagement extends ComponentBase
 {
@@ -254,6 +255,75 @@ public function onSearchPatients()
 
 
 
+
+
+
+
+  public function onCreateVisitHistory()
+{
+    $data = post();
+
+    // Получаем ID текущего авторизованного врача
+    $doctorId = Auth::getUser()->id;
+
+    // Проверка обязательных полей
+    if (empty($data['patient_id']) || empty($data['visit_date']) || empty($data['notes'])) {
+        throw new ApplicationException('Все поля обязательны для заполнения.');
+    }
+
+    // Создание новой записи в истории посещений
+    $visitHistory = new VisitHistory();
+    $visitHistory->patient_id = $data['patient_id'];
+    $visitHistory->doctor_id = $doctorId;
+    $visitHistory->visit_date = Carbon::parse($data['visit_date']);
+    $visitHistory->notes = $data['notes'];
+    $visitHistory->status = $data['status'] ?? 'Ожидается'; // Если статус не указан, по умолчанию "Ожидается"
+    $visitHistory->save();
+
+    return [
+        'error' => false,
+        'message' => 'Запись успешно добавлена.'
+    ];
+}
+
+
+
+
+  public function loadVisitHistory($patientId)
+  {
+      $doctorId = Auth::getUser()->id; // Получаем ID текущего врача
+
+      // Загружаем записи посещений для данного врача и пациента
+      return VisitHistory::where('patient_id', $patientId)
+                        ->where('doctor_id', $doctorId)
+                        ->orderBy('visit_date', 'desc')
+                        ->get();
+  }
+
+
+  public function onFilterVisitHistory()
+  {
+      $data = post();
+
+      $query = VisitHistory::where('patient_id', $data['patient_id']);
+
+      if (!empty($data['doctor_id'])) {
+          $query->where('doctor_id', $data['doctor_id']);
+      }
+
+      if (!empty($data['start_date'])) {
+          $query->where('visit_date', '>=', Carbon::parse($data['start_date']));
+      }
+
+      if (!empty($data['end_date'])) {
+          $query->where('visit_date', '<=', Carbon::parse($data['end_date']));
+      }
+
+      $this->page['visit_histories'] = $query->orderBy('visit_date', 'desc')->get();
+
+      // Обновляем partial с результатами
+      return ['#visit_history_list' => $this->renderPartial('visit_history_list', ['visit_histories' => $this->page['visit_histories']])];
+  }
 
 
 }

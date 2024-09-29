@@ -5,16 +5,16 @@ use Model;
 
 class Appointment extends Model
 {
-    public $table = 'winter_user_appointments'; // Название таблицы в БД
-
-    protected $fillable = [
-        'patient_id',
-        'doctor_id',
-        'appointment_date',
-    ];
+    protected $table = 'winter_user_appointments'; // Укажите правильное имя таблицы
 
     public $belongsTo = [
-        'patient' => ['Winter\User\Models\User'],
-        'doctor' => ['Winter\User\Models\User'],
+        'patient' => ['Winter\User\Models\User', 'key' => 'patient_id'], // Связь с пациентом
+        'doctor' => ['Winter\User\Models\User', 'key' => 'doctor_id']  // Связь с врачом
     ];
+
+    public function patient()
+{
+    return $this->belongsTo(User::class, 'patient_id');
+}
+
 }

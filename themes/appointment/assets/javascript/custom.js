@@ -31,7 +31,7 @@ function handleFormResponse(data, formType) {
 
 $(document).ready(function () {
     // Инициализация jQuery UI Datepicker с кнопками
-    $("#appointment_date").datepicker({
+    $("#appointment_date, #visit_date").datepicker({
         dateFormat: "dd.mm.yy", // Формат даты: день.месяц.год
         changeMonth: false, // Отключаем выбор месяца
         changeYear: false, // Отключаем выбор года
@@ -45,7 +45,7 @@ $(document).ready(function () {
 
     // Обработчик для кнопки "Сегодня"
     $(document).on("click", ".ui-datepicker-current", function () {
-        $("#appointment_date").datepicker("setDate", new Date()); // Устанавливаем текущую дату
+        $("#appointment_date, #visit_date").datepicker("setDate", new Date()); // Устанавливаем текущую дату
     });
 });
 
@@ -60,6 +60,9 @@ $(document).ready(function () {
         
     });
 });
+
+
+
 
 // При выборе врача сбрасываем поля даты и времени
 $("#doctor_id").on("change", function () {
@@ -220,3 +223,67 @@ $(document).ready(function () {
     });
 });
 
+
+
+
+
+
+
+$(document).ready(function () {
+    // Инициализация jQuery UI Datepicker для start_date
+    $("#start_date").datepicker({
+        dateFormat: "dd.mm.yy", // Формат даты: день.месяц.год
+        changeMonth: false, // Отключаем выбор месяца
+        changeYear: false, // Отключаем выбор года
+        regional: "ru", // Устанавливаем русский язык
+        showButtonPanel: true, // Включаем отображение кнопок
+        closeText: "Закрыть", // Текст для кнопки закрытия
+        currentText: "Сегодня", // Текст для кнопки "Сегодня"
+        showAnim: "slideDown", // Анимация при открытии
+        onSelect: function (selectedDate) {
+            var startDate = $(this).datepicker("getDate");
+            // Устанавливаем минимальную дату для end_date на следующий день после start_date
+            $("#end_date").datepicker("option", "minDate", startDate);
+        },
+    });
+
+    // Инициализация jQuery UI Datepicker для end_date
+    $("#end_date").datepicker({
+        dateFormat: "dd.mm.yy", // Формат даты: день.месяц.год
+        changeMonth: false, // Отключаем выбор месяца
+        changeYear: false, // Отключаем выбор года
+        regional: "ru", // Устанавливаем русский язык
+        showButtonPanel: true, // Включаем отображение кнопок
+        closeText: "Закрыть", // Текст для кнопки закрытия
+        currentText: "Сегодня", // Текст для кнопки "Сегодня"
+        showAnim: "slideDown", // Анимация при открытии
+        onSelect: function (selectedDate) {
+            var endDate = $(this).datepicker("getDate");
+            // Устанавливаем максимальную дату для start_date как выбранную end_date
+            $("#start_date").datepicker("option", "maxDate", endDate);
+        },
+    });
+
+    // Обработчик для кнопки "Сегодня" в обеих полях
+    $(document).on("click", ".ui-datepicker-current", function () {
+        const currentDate = new Date();
+        $("#start_date").datepicker("setDate", currentDate); // Устанавливаем текущую дату для поля start_date
+        $("#end_date").datepicker("setDate", currentDate); // Устанавливаем текущую дату для поля end_date
+    });
+});
+
+
+
+$(document).ready(function () {
+    // Инициализация Datepicker для даты рождения
+    $("#birthdate").datepicker({
+        dateFormat: "dd.mm.yy", // Формат даты: год-месяц-день
+        changeMonth: true, // Разрешить выбор месяца
+        changeYear: true, // Разрешить выбор года
+        yearRange: "-100:+0", // Ограничение диапазона выбора лет (например, от 100 лет назад до текущего года)
+        maxDate: 0, // Запрет на выбор будущих дат
+     
+        showAnim: "slideDown", // Анимация при открытии
+        
+    });
+});
