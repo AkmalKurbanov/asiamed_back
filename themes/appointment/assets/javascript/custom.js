@@ -1,289 +1,295 @@
-
 function handleFormResponse(data, formType) {
-    // Проверка на ошибки
     if (data.error) {
         // Выводим сообщение об ошибке
         $("#flash-message").html(
-            '<div class="alert alert-danger">' + data.message + "</div>"
+            '<div class="alert alert-danger" role="alert">' +
+                data.message +
+                "</div>"
         );
     } else {
         // Выводим сообщение об успехе
         $("#flash-message").html(
-            '<div class="alert alert-success">' + data.message + "</div>"
+            '<div class="alert alert-success" role="alert">' +
+                data.message +
+                "</div>"
         );
 
-        // Сбрасываем форму только для создания врача или пациента
-        if (formType === "createDoctor") {
-            $("#doctorForm")[0].reset();
-        } else if (formType === "createPatient") {
-            $("#patientForm")[0].reset();
-        } else if (formType === "editPatient") {
-            // Сообщение для редактирования пациента
-            console.log("Пациент успешно обновлен");
+        // Обновляем информацию о враче
+        if (data.doctor && data.doctor.name && data.doctor.surname) {
+            // Обновляем информацию о враче, если врач есть
+            $("#doctor-info").html(
+                "<p>Лечащий врач (Постоянный): " +
+                    data.doctor.name +
+                    " " +
+                    data.doctor.surname +
+                    "</p>" +
+                    '<button id="detach-doctor-button" class="btn btn-danger" onclick="detachDoctor(' +
+                    data.patient.id +
+                    ')">Открепить врача</button>'
+            );
+
+            // Блокируем селект врача, так как врач назначен
+            $("#doctor_id").prop("disabled", true);
+        } else {
+            // Если врача нет (doctor_id null)
+            $("#doctor-info").html(
+                "<p>Лечащий врач (Постоянный): Не назначен</p>"
+            );
+
+            // Разблокируем селект врача, так как врач откреплен
+            $("#doctor_id").prop("disabled", false);
         }
+
+        // Сбрасываем селект до дефолтного значения
+        $("#doctor_id").val(""); // Очищаем текущее значение
+        $("#doctor_id option:first").prop("selected", true); // Устанавливаем дефолтный option
+
+        // Скрываем чекбокс, так как действие завершено
+        $("#make_primary_container").hide();
+        $("#make_primary").prop("checked", false);
     }
 
     // Убираем сообщение через 5 секунд
     setTimeout(function () {
-        $("#flash-message").html("");
+        $("#flash-message").fadeOut(500, function () {
+            $(this).html("").show();
+        });
     }, 5000);
 }
 
+// Функция открепления врача
+function detachDoctor(patientId) {
+    $.request("onDetachDoctor", {
+        data: { patient_id: patientId },
+        success: function (response) {
+            if (response.error) {
+                $("#flash-message").html(
+                    '<div class="alert alert-danger" role="alert">' +
+                        response.message +
+                        "</div>"
+                );
+            } else {
+                // Обновляем интерфейс: меняем текст на "Врач не назначен"
+                $("#doctor-info").html(
+                    "<p>Лечащий врач (Постоянный): Не назначен</p>"
+                );
+
+                // Разблокируем селект для выбора врача
+                $("#doctor_id").prop("disabled", false);
+
+                // Сбрасываем выбранное значение селекта на дефолтное
+                $("#doctor_id").val("");
+
+                // Скрываем чекбокс
+                $("#make_primary_container").hide();
+
+                // Убираем кнопку открепления
+                $("#detach-doctor-button").remove();
+
+                // Показать сообщение об успехе
+                $("#flash-message").html(
+                    '<div class="alert alert-success" role="alert">' +
+                        response.message +
+                        "</div>"
+                );
+
+                // Убираем сообщение через 5 секунд
+                setTimeout(function () {
+                    $("#flash-message").fadeOut(500, function () {
+                        $(this).html("").show();
+                    });
+                }, 5000);
+            }
+        },
+        error: function () {
+            $("#flash-message").html(
+                '<div class="alert alert-danger" role="alert">Ошибка при выполнении запроса.</div>'
+            );
+        },
+    });
+}
+
 $(document).ready(function () {
-    // Инициализация jQuery UI Datepicker с кнопками
+    // Скрываем чекбокс, если врач уже добавлен и селект заблокирован
+    if ($("#doctor_id").is(":disabled")) {
+        $("#make_primary_container").hide();
+    }
+
+    // Показываем чекбокс при выборе врача в селекте
+    $("#doctor_id").on("change", function () {
+        if ($(this).val()) {
+            $("#make_primary_container").show();
+        } else {
+            $("#make_primary_container").hide();
+        }
+    });
+});
+
+$(document).ready(function () {
+    // Инициализация jQuery UI Datepicker
     $("#appointment_date, #visit_date").datepicker({
-        dateFormat: "dd.mm.yy", // Формат даты: день.месяц.год
-        changeMonth: false, // Отключаем выбор месяца
-        changeYear: false, // Отключаем выбор года
-        minDate: 0, // Блокируем прошедшие даты (минимум сегодня)
-        regional: "ru", // Устанавливаем русский язык
-        showButtonPanel: true, // Включаем отображение кнопок
-        closeText: "Закрыть", // Текст для кнопки закрытия
-        currentText: "Сегодня", // Текст для кнопки "Сегодня"
-        showAnim: "slideDown", // Анимация при открытии
+        dateFormat: "dd.mm.yy",
+        changeMonth: false,
+        changeYear: false,
+        minDate: 0,
+        regional: "ru",
+        showButtonPanel: true,
+        closeText: "Закрыть",
+        currentText: "Сегодня",
+        showAnim: "slideDown",
     });
 
-    // Обработчик для кнопки "Сегодня"
-    $(document).on("click", ".ui-datepicker-current", function () {
-        $("#appointment_date, #visit_date").datepicker("setDate", new Date()); // Устанавливаем текущую дату
-    });
-});
-
-$(document).ready(function () {
     // Инициализация ClockPicker
-    var clockpicker = $("#appointment_time").clockpicker({
-        autoclose: true, // Закрыть после выбора времени
-        default: "now", // Установить текущее время как значение по умолчанию
-        placement: "bottom", // Открывать ниже поля ввода
-        align: "left", // Выравнивание
-        donetext: "Готово", // Текст кнопки завершения
-        
+    $("#appointment_time").clockpicker({
+        autoclose: true,
+        default: "now",
+        placement: "bottom",
+        align: "left",
+        donetext: "Готово",
     });
-});
 
-
-
-
-// При выборе врача сбрасываем поля даты и времени
-$("#doctor_id").on("change", function () {
-    // Сбрасываем поле даты
-    $("#appointment_date").val("");
-    // Сбрасываем поле времени
-    $("#appointment_time").val("");
-
-    // Очищаем список забронированного времени
-    $("#booked_times")
-        .empty()
-        .append('<li class="list-group-item">Выберите дату</li>');
-});
-
-// При изменении даты сбрасываем поле времени
-$("#appointment_date").on("change", function () {
-    $("#appointment_time").val(""); // Сбрасываем поле времени
-});
-
-// При изменении врача или даты
-$("#doctor_id, #appointment_date").on("change", function () {
-    var doctorId = $("#doctor_id").val();
-    var selectedDate = $("#appointment_date").val();
-
-    // Проверяем, что выбраны врач и дата
-    if (doctorId && selectedDate) {
-        console.log(
-            "Запрашиваем забронированное время для врача с ID:",
-            doctorId,
-            "и даты:",
-            selectedDate
-        );
-
-        // Выполняем AJAX-запрос для получения забронированного времени
-        $.request("onGetBookedTimes", {
-            data: { doctor_id: doctorId, selected_date: selectedDate },
-            success: function (data) {
-                console.log("Данные от сервера:", data);
-
-                // Очищаем список забронированного времени
-                $("#booked_times").empty();
-
-                if (data.times && data.times.length > 0) {
-                    // Добавляем забронированное время в список с днем недели и датой
-                    data.times.forEach(function (item) {
-                        var formattedTime = item.time.slice(0, 5); // Время без секунд (HH:mm)
-                        var hiddenTime = item.time; // Полное время для сравнения (HH:mm:ss)
-
-                        // Добавляем элемент списка с видимым временем и скрытым элементом
-                        $("#booked_times").append(
-                            '<li class="list-group-item">' +
-                                item.day_of_week +
-                                ", " +
-                                item.date +
-                                " - " +
-                                formattedTime +
-                                '<input type="hidden" class="booked-time-hidden" value="' +
-                                hiddenTime +
-                                '">' +
-                                "</li>"
-                        );
-                    });
-
-                    // Заблокируем уже занятое время в Clockpicker
-                    var bookedTimes = data.times.map(function (item) {
-                        return item.time; // Массив забронированного времени с секундами
-                    });
-
-                    console.log(
-                        "Забронированное время (с секундами):",
-                        bookedTimes
-                    );
-
-                    // Добавляем обработчик для изменения времени
-                    $("#appointment_time")
-                        .off("change")
-                        .on("change", function () {
-                            var selectedTime = $("#appointment_time").val();
-                            var formattedTime = selectedTime + ":00"; // Добавляем секунды для сравнения
-
-                            console.log(
-                                "Выбранное время (с секундами):",
-                                formattedTime
-                            );
-
-                            // Проверка совпадения выбранного времени с забронированным
-                            if (bookedTimes.includes(formattedTime)) {
-                                alert(
-                                    "Это время уже забронировано. Пожалуйста, выберите другое время."
-                                );
-                                $("#appointment_time").val(""); // Очищаем поле, если время занято
-                            }
-                        });
-                } else {
-                    // Если нет забронированного времени, очищаем обработчик на appointment_time
-                    $("#booked_times").append(
-                        '<li class="list-group-item">Нет забронированного времени</li>'
-                    );
-                    $("#appointment_time").off("change"); // Убираем обработчик, если нет забронированных времен
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.error("Ошибка при запросе:", textStatus, errorThrown);
-            },
-        });
-    } else {
-        console.log("Врач или дата не выбраны.");
+    // Сброс даты и времени при выборе врача
+    $("#doctor_id").on("change", function () {
+        $("#appointment_date").val("");
+        $("#appointment_time").val("");
         $("#booked_times")
             .empty()
-            .append('<li class="list-group-item">Выберите врача и дату</li>');
-        $("#appointment_time").off("change"); // Убираем обработчик, если врач или дата не выбраны
-    }
-});
+            .append('<li class="list-group-item">Выберите дату</li>');
+    });
 
+    // Сброс времени при изменении даты
+    $("#appointment_date").on("change", function () {
+        $("#appointment_time").val("");
+    });
 
+    // Запрос на получение забронированного времени при изменении врача или даты
+    $("#doctor_id, #appointment_date").on("change", function () {
+        var doctorId = $("#doctor_id").val();
+        var selectedDate = $("#appointment_date").val();
 
-$(".tile-visible-js").on('click', function(){
-    $(".table-list").hide();
-    $(".tile-list").show();
-    $(window).scrollTop($(window).scrollTop() + 1);
-});
+        if (doctorId && selectedDate) {
+            $.request("onGetBookedTimes", {
+                data: { doctor_id: doctorId, selected_date: selectedDate },
+                success: function (data) {
+                    $("#booked_times").empty();
+                    if (data.times && data.times.length > 0) {
+                        data.times.forEach(function (item) {
+                            var formattedTime = item.time.slice(0, 5);
+                            $("#booked_times").append(
+                                '<li class="list-group-item">' +
+                                    item.day_of_week +
+                                    ", " +
+                                    item.date +
+                                    " - " +
+                                    formattedTime +
+                                    "</li>"
+                            );
+                        });
 
-$(".table-visible-js").on('click', function(){
-    $(".tile-list").hide();
-    $(".table-list").show();
-});
+                        var bookedTimes = data.times.map(function (item) {
+                            return item.time;
+                        });
 
+                        $("#appointment_time")
+                            .off("change")
+                            .on("change", function () {
+                                var selectedTime =
+                                    $("#appointment_time").val() + ":00";
+                                if (bookedTimes.includes(selectedTime)) {
+                                    alert(
+                                        "Это время уже забронировано. Пожалуйста, выберите другое время."
+                                    );
+                                    $("#appointment_time").val("");
+                                }
+                            });
+                    } else {
+                        $("#booked_times").append(
+                            '<li class="list-group-item">Нет забронированного времени</li>'
+                        );
+                        $("#appointment_time").off("change");
+                    }
+                },
+            });
+        } else {
+            $("#booked_times")
+                .empty()
+                .append(
+                    '<li class="list-group-item">Выберите врача и дату</li>'
+                );
+            $("#appointment_time").off("change");
+        }
+    });
 
+    // Переключение вида таблиц
+    $(".tile-visible-js").on("click", function () {
+        $(".table-list").hide();
+        $(".tile-list").show();
+        $(window).scrollTop($(window).scrollTop() + 1);
+    });
 
+    $(".table-visible-js").on("click", function () {
+        $(".tile-list").hide();
+        $(".table-list").show();
+    });
 
-
-
-
-
-// скрипт для динамического поиска
-$(document).ready(function () {
-    // Обработчик ввода в поле поиска
+    // Поиск пациентов
     $("#patient_search").on("keyup", function () {
-        var query = $(this).val(); // Получаем введенный текст
-
-        // Выполняем Ajax-запрос на поиск пациентов
+        var query = $(this).val();
         $.request("onSearchPatients", {
-            data: { search_query: query }, // Отправляем введенный запрос
-            update: { patient_list: "#patient_list" }, // Обновляем partial 'patient_list'
+            data: { search_query: query },
+            update: { patient_list: "#patient_list" },
         });
     });
-});
-$(document).ready(function () {
-    // Обработчик ввода в поле поиска
+
+    // Поиск врачей
     $("#doctor_search").on("keyup", function () {
-        var query = $(this).val(); // Получаем введенный текст
-
-        // Выполняем Ajax-запрос на поиск пациентов
+        var query = $(this).val();
         $.request("onSearchDoctors", {
-            data: { search_query: query }, // Отправляем введенный запрос
-            update: { patient_list: "#doctor_list" }, // Обновляем partial 'patient_list'
+            data: { search_query: query },
+            update: { doctor_list: "#doctor_list" },
         });
     });
+
+    // Datepicker для других дат
+    $("#start_date, #end_date, #birthdate").datepicker({
+        dateFormat: "dd.mm.yy",
+        regional: "ru",
+        changeMonth: true,
+        changeYear: true,
+        maxDate: 0,
+        yearRange: "-100:+0",
+        showAnim: "slideDown",
+    });
+
+    // Переключение вкладок
+    $("#patientTabs a").on("click", function (e) {
+        e.preventDefault();
+        $(this).tab("show");
+    });
+
+    $("#patientTabs a:first").tab("show");
+
+    // Показ чекбокса для назначения врача
+    $("#doctor_id").on("change", function () {
+        var selectedDoctor = this.value;
+        if (selectedDoctor) {
+            $("#make_primary_container").show();
+        } else {
+            $("#make_primary_container").hide();
+        }
+    });
 });
 
-
-
-
-
-
-
-$(document).ready(function () {
-    // Инициализация jQuery UI Datepicker для start_date
-    $("#start_date").datepicker({
-        dateFormat: "dd.mm.yy", // Формат даты: день.месяц.год
-        changeMonth: false, // Отключаем выбор месяца
-        changeYear: false, // Отключаем выбор года
-        regional: "ru", // Устанавливаем русский язык
-        showButtonPanel: true, // Включаем отображение кнопок
-        closeText: "Закрыть", // Текст для кнопки закрытия
-        currentText: "Сегодня", // Текст для кнопки "Сегодня"
-        showAnim: "slideDown", // Анимация при открытии
-        onSelect: function (selectedDate) {
-            var startDate = $(this).datepicker("getDate");
-            // Устанавливаем минимальную дату для end_date на следующий день после start_date
-            $("#end_date").datepicker("option", "minDate", startDate);
+function detachDoctor(patientId) {
+    $.request("onDetachDoctor", {
+        data: { patient_id: patientId },
+        success: function (response) {
+            handleFormResponse(response, "detachDoctor");
+        },
+        error: function () {
+            $("#flash-message").html(
+                '<div class="alert alert-danger" role="alert">Ошибка при выполнении запроса.</div>'
+            );
         },
     });
-
-    // Инициализация jQuery UI Datepicker для end_date
-    $("#end_date").datepicker({
-        dateFormat: "dd.mm.yy", // Формат даты: день.месяц.год
-        changeMonth: false, // Отключаем выбор месяца
-        changeYear: false, // Отключаем выбор года
-        regional: "ru", // Устанавливаем русский язык
-        showButtonPanel: true, // Включаем отображение кнопок
-        closeText: "Закрыть", // Текст для кнопки закрытия
-        currentText: "Сегодня", // Текст для кнопки "Сегодня"
-        showAnim: "slideDown", // Анимация при открытии
-        onSelect: function (selectedDate) {
-            var endDate = $(this).datepicker("getDate");
-            // Устанавливаем максимальную дату для start_date как выбранную end_date
-            $("#start_date").datepicker("option", "maxDate", endDate);
-        },
-    });
-
-    // Обработчик для кнопки "Сегодня" в обеих полях
-    $(document).on("click", ".ui-datepicker-current", function () {
-        const currentDate = new Date();
-        $("#start_date").datepicker("setDate", currentDate); // Устанавливаем текущую дату для поля start_date
-        $("#end_date").datepicker("setDate", currentDate); // Устанавливаем текущую дату для поля end_date
-    });
-});
-
-
-
-$(document).ready(function () {
-    // Инициализация Datepicker для даты рождения
-    $("#birthdate").datepicker({
-        dateFormat: "dd.mm.yy", // Формат даты: год-месяц-день
-        changeMonth: true, // Разрешить выбор месяца
-        changeYear: true, // Разрешить выбор года
-        yearRange: "-100:+0", // Ограничение диапазона выбора лет (например, от 100 лет назад до текущего года)
-        maxDate: 0, // Запрет на выбор будущих дат
-     
-        showAnim: "slideDown", // Анимация при открытии
-        
-    });
-});
+}

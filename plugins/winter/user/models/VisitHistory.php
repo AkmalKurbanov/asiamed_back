@@ -14,12 +14,8 @@ class VisitHistory extends Model
         'patient' => ['Winter\User\Models\User', 'key' => 'patient_id'],
         'doctor' => ['Winter\User\Models\User', 'key' => 'doctor_id'],
     ];
-    protected $fillable = ['patient_id', 'doctor_id', 'visit_date', 'notes'];
+    protected $fillable = ['patient_id', 'doctor_id', 'visit_date', 'notes', 'status'];
 
-    public function beforeCreate()
-    {
-        $this->visit_date = Carbon::now();
-    }
-    
+   
     
 }

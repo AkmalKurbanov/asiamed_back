@@ -64,7 +64,10 @@ class User extends UserBase
         'password',
         'password_confirmation',
         'created_ip_address',
-        'last_ip_address'
+        'last_ip_address',
+        'gender',       
+        'address',      
+        'birthdate',    
     ];
     
     /**
@@ -542,5 +545,9 @@ class User extends UserBase
     public function visit_histories()
 {
     return $this->hasMany(VisitHistory::class, 'patient_id');
+}
+public function doctor()
+{
+    return $this->belongsTo(User::class, 'doctor_id');
 }
 }

@@ -10,97 +10,180 @@ redirect = "/login"
 patient_id = "{{ :patient_id }}"
 ==
 
+
 <div class="container py-5">
+  <div id="flash-message" style="position:fixed; top:90px; right:10px; z-index:1021"></div>
+  <ul class="nav nav-tabs" id="patientTabs" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" id="personal-info-tab" data-toggle="tab" href="#personal-info" role="tab" aria-controls="personal-info" aria-selected="true">Личная информация</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="visit-history-tab" data-toggle="tab" href="#visit-history" role="tab" aria-controls="visit-history" aria-selected="false">История посещений</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="add-visit-history-tab" data-toggle="tab" href="#add-visit-history" role="tab" aria-controls="visit-history" aria-selected="false">Добавить запись о визите</a>
+    </li>
+  </ul>
 
-    <h3>Фильтр по дате</h3>
-       <!-- Форма для фильтрации -->
-  <form data-request="patientManagement::onFilterVisitHistory">
-    <div class="bg-light rounded h-100 d-flex align-items-center p-5">
+  <br />
 
-      <input type="hidden" name="patient_id" value="{{ patient.id }}"> <!-- Скрытое поле для передачи patient_id -->
-      
-      <div class="row g-3" style="width:100%">
-      <div class="col-12 col-lg-4">
-            <div class="input-group" id="diapozon1"> 
-                <input type="text" id="start_date" name="start_date" class="form-control border-0" placeholder="Начальная дата" autocomplete="off" style="height: 55px; cursor:pointer;" />
-                <div class="input-group-append" style="position: absolute; right:10px; top:50%; transform: translateY(-50%); pointer-events:none;">
-                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-12 col-lg-4">
-            <div class="input-group" id="diapozon2"> 
-                <input type="text" id="end_date" name="end_date" class="form-control border-0" placeholder="Конечная дата" autocomplete="off" style="height: 55px; cursor:pointer;" />
-                <div class="input-group-append" style="position: absolute; right:10px; top:50%; transform: translateY(-50%); pointer-events:none;">
-                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                </div>
-            </div>
-        </div>
-      <div class="col-12 col-lg-4">
-        <button type="submit" class="btn btn-primary w-100 py-3">Применить фильтр</button>
-      </div>
-      </div>
-      
-
-      
-    </div>
-  </form>
-
-    <br>
-
-    <!-- Список истории посещений -->
-    <div id="visit_history_list">
-        {% partial 'visit_history_list' visit_histories=visit_histories %}
-    </div>
-
-    <br>
-   
-    <!-- Форма для добавления новой записи о визите -->
-    <h3>Добавить новую запись о визите</h3>
-    <form data-request="patientManagement::onCreateVisitHistory">
-      <div class="bg-light rounded h-100 d-flex align-items-center p-5">
-        <input type="hidden" name="patient_id" value="{{ patient.id }}"> <!-- Скрытое поле для передачи patient_id -->
-        <div class="row g-3" style="width:100%">
-        <div class="col-lg-12">
-          <label>Дата визита</label>
-            <div class="input-group" id="datepicker">
-              <input type="text" id="visit_date" name="visit_date" class="form-control border-0" placeholder="Выберите дату" autocomplete="off" required style="height: 55px; cursor:pointer;" />
-              <div class="input-group-append" style="position: absolute; right:10px; top:50%; transform: translateY(-50%); pointer-events:none; ">
-                  <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-              </div>
-            </div>
-          </div>
-        <div class="col-lg-12">
-          <label>Дата визита11</label>
-            <div class="input-group">
-              <input type="text" id="birthdate" name="birthdate" class="form-control border-0" placeholder="Выберите дату рождения" autocomplete="off" required style="height: 55px; cursor:pointer;" />
-              <div class="input-group-append" style="position: absolute; right:10px; top:50%; transform: translateY(-50%); pointer-events:none; ">
-                  <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-              </div>
-            </div>
-          </div>
-
-         <div class="col-lg-12">
-            <label>Заметки</label>
-            <textarea name="notes" class="form-control" required></textarea>
-        </div>
-
-        <div class="col-sm-12">
-            <label>Статус визита</label>
-            <select id="doctor_id" name="doctor_id" required class="form-select border-0" style="height: 55px;">
-              <option value="Ожидается">Ожидается</option>
-              <option value="Завершено">Завершено</option>
-              <option value="Отменено">Отменено</option>
-            </select>
-        </div>
-
-        <div class="col-lg-12">
-          <button type="submit" class="btn btn-primary mt-4 py-3">Добавить запись</button>
-        </div>
-        </div>
-        </div>
-    </form>
-
+  <div class="tab-content" id="patientTabsContent">
     
+    <!-- Вкладка для личной информации -->
+    <div class="tab-pane fade show active" id="personal-info" role="tabpanel" aria-labelledby="personal-info-tab">
+      <h4 class="mb-4">Информация о пациенте</h4>
+
+      <div id="flash-message" style="position: fixed; top: 90px; right: 10px; z-index: 1021;"></div>
+
+      <form id="editPatientForm" data-request="onUpdatePatientByDoctor" data-request-success="handleFormResponse(data, 'editPatient')">
+        <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+        <div class="bg-light rounded h-100 d-flex align-items-center p-5">
+          <div class="row g-3">
+            <div class="col-12 col-lg-6">
+              <label for="name">Имя</label>
+              <input id="name" class="form-control border-0" type="text" name="name" placeholder="Имя" value="{{ patient.name }}" required style="height: 55px;" />
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <label for="surname">Фамилия</label>
+              <input id="surname" class="form-control border-0" type="text" name="surname" placeholder="Фамилия" value="{{ patient.surname }}" required style="height: 55px;" />
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <label for="iu_telephone">Телефон</label>
+              <input id="iu_telephone" class="form-control border-0" type="text" name="iu_telephone" placeholder="Телефон" value="{{ patient.iu_telephone }}" required style="height: 55px;" />
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <label for="address">Адрес</label>
+              <input id="address" class="form-control border-0" type="text" name="address" placeholder="Адрес" value="{{ patient.address }}" required style="height: 55px;" />
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <label for="birthdate">Дата рождения</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  id="birthdate"
+                  name="birthdate"
+                  class="form-control border-0"
+                  placeholder="Выберите дату рождения"
+                  autocomplete="off"
+                  value="{{ patient.birthdate| date('d.m.Y') }}"
+                  required
+                  style="height: 55px; cursor: pointer;"
+                />
+                <div class="input-group-append" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                  <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <label for="gender">Пол</label>
+              <select name="gender" id="gender" class="form-select border-0" style="height: 55px;">
+                <option selected>Выберите пол</option>
+                <option value="Мужской" {{ patient.gender == 'Мужской' ? 'selected' : '' }}>Мужской</option>
+                <option value="Женский" {{ patient.gender == 'Женский' ? 'selected' : '' }}>Женский</option>
+              </select>
+            </div>
+
+            <div class="col-sm-12">
+              <button type="submit" class="btn btn-primary w-100 py-3">Сохранить изменения</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Вкладка для истории посещений -->
+    <div class="tab-pane fade" id="visit-history" role="tabpanel" aria-labelledby="visit-history-tab">
+      <h3>История посещений</h3>
+      <br />
+      <h4 class="mb-4">Фильтр по дате</h4>
+      <!-- Форма для фильтрации -->
+      <form data-request="patientManagement::onFilterVisitHistory">
+        <div class="bg-light rounded h-100 d-flex align-items-center p-5">
+          <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+          <!-- Скрытое поле для передачи patient_id -->
+
+          <div class="row g-3" style="width: 100%;">
+            <div class="col-12 col-lg-4">
+              <div class="input-group" id="diapozon1">
+                <input type="text" id="start_date" name="start_date" class="form-control border-0" placeholder="Начальная дата" autocomplete="off" style="height: 55px; cursor: pointer;" />
+                <div class="input-group-append" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                  <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+              <div class="input-group" id="diapozon2">
+                <input type="text" id="end_date" name="end_date" class="form-control border-0" placeholder="Конечная дата" autocomplete="off" style="height: 55px; cursor: pointer;" />
+                <div class="input-group-append" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                  <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-12 col-lg-4">
+              <button type="submit" class="btn btn-primary w-100 py-3">Применить фильтр</button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <!-- Список истории посещений -->
+      <div id="visit_history_list">
+        {% partial 'visit_history_list' visit_histories=visit_histories %}
+      </div>
+    </div>
+
+    <!-- Вкладка добавить новую запись о визите -->
+    <div class="tab-pane fade" id="add-visit-history" role="tabpanel" aria-labelledby="add-visit-history-tab">
+      <h3 class="mb-4">Добавить новую запись о визите</h3>
+      
+      
+      <form id="createVisitForm" data-request="patientManagement::onCreateVisitHistory" data-request-success="handleFormResponse(data, 'createVisit')">
+        <div class="bg-light rounded h-100 d-flex align-items-center p-5">
+          <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+          <!-- Скрытое поле для передачи patient_id -->
+          <div class="row g-3" style="width: 100%;">
+            <div class="col-lg-12">
+              <label>Дата визита</label>
+              <div class="input-group" id="datepicker">
+                <input type="text" id="visit_date" name="visit_date" class="form-control border-0" placeholder="Выберите дату" autocomplete="off" required style="height: 55px; cursor: pointer;" />
+                <div class="input-group-append" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                  <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-12">
+              <label>Заметки</label>
+              <textarea name="notes" class="form-control" required></textarea>
+            </div>
+
+            <div class="col-sm-12">
+              <label>Статус визита</label>
+              <select id="status" name="status" required class="form-select border-0" style="height: 55px;">
+                <option value="Ожидается">Ожидается</option>
+                <option value="Завершено">Завершено</option>
+                <option value="Отменено">Отменено</option>
+              </select>
+            </div>
+
+            <div class="col-lg-12">
+              <button type="submit" class="btn btn-primary mt-4 py-3">Добавить запись</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+  </div>
 </div>
+
+
+
+

@@ -169,20 +169,24 @@ class DoctorManagement extends ComponentBase
    
  public function onSearchDoctors()
 {
-    $query = post('search_query');
+    $query = post('search_query'); // Получаем поисковый запрос
 
+    // Если запрос пустой, загружаем всех врачей
     if (empty($query)) {
         $this->page['doctors'] = User::whereHas('groups', function ($q) {
             $q->where('code', 'doctors');
         })->get();
     } else {
+        // Поиск врачей по имени, фамилии или специальности
         $this->page['doctors'] = User::whereHas('groups', function ($q) {
             $q->where('code', 'doctors');
         })
         ->where(function ($q) use ($query) {
-            $q->where('name', 'like', '%' . $query . '%')
-              ->orWhere('surname', 'like', '%' . $query . '%')
-              ->orWhere('iu_telephone', 'like', '%' . $query . '%');
+            $q
+                ->where('name', 'like', '%' . $query . '%')
+                ->orWhere('surname', 'like', '%' . $query . '%')
+                ->orWhere('iu_job', 'like', '%' . $query . '%')
+                ->orWhere('email', 'like', '%' . $query . '%'); 
         })
         ->get();
     }

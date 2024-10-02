@@ -2,14 +2,21 @@
 <tr>
     <td>{{ patient.name }}</td>
     <td>{{ patient.surname }}</td>
+    <td>{{ patient.birthdate }}</td>
     <td>{{ patient.iu_telephone }}</td>
-    <td>
-        <!-- Ссылка на страницу редактирования пациента -->
-        <a href="{{ 'edit-patient' | page({ patient_id: patient.id }) }}" class="btn btn-warning">Редактировать</a>
+    <td style="text-align: end">
+
+        <a href="{{ 'edit-patient' | page({ patient_id: patient.id }) }}" class="btn btn-warning" style="margin-right: 20px">Редактировать</a>
+        <a href="{{ 'appointment-patient' | page({ patient_id: patient.id }) }}" class="btn btn-primary">Записать на прием</a>
     </td>
 </tr>
 {% else %}
 <tr>
-    <td colspan="4">Пациенты не найдены.</td>
+    <td colspan="5">Пациенты не найдены.</td>
+    
 </tr>
 {% endfor %}
+
+
+
+

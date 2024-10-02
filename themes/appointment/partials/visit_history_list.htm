@@ -1,12 +1,21 @@
 {% if visit_histories is not empty %}
-    <ul>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Дата визита</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
     {% for visit in visit_histories %}
-        <li>
-            <strong>Дата визита:</strong> {{ visit.visit_date|date('d.m.Y H:i') }}<br>
-            <strong>Заметки:</strong> {{ visit.notes }}
-        </li>
+      <tr>
+        <td>{{ visit.visit_date|date('d.m.Y H:i') }}</td>
+        <td><a href="{{ 'edit-doctor' | page({ id: doctor.id }) }}" class="btn btn-warning">Просмотреть</a></td>
+      </tr>
     {% endfor %}
-    </ul>
-{% else %}
+    </tbody>
+  </table>
+  {% else %}
     <p>История посещений отсутствует.</p>
 {% endif %}

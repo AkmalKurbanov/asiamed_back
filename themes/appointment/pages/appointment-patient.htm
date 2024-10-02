@@ -1,5 +1,5 @@
 title = "Редактирование пациента"
-url = "/edit-patient/:patient_id"
+url = "/appointment-patient/:patient_id"
 layout = "default"
 is_hidden = 0
 
@@ -16,34 +16,26 @@ patient_id = "{{ :patient_id }}"
 
 
 
+
+
 <div class="container-xxl py-5">
     <div class="container">
         <div class="row g-5">
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
-                <p class="d-inline-block border rounded-pill py-1 px-4">Редактирование пациента: {{ patient.name }} {{ patient.surname }}</p>
-                <h1 class="mb-4">Редактирование пациента</h1>
+                <p class="d-inline-block border rounded-pill py-1 px-4">Запись пациента на прием: {{ patient.name }} {{ patient.surname }}</p>
+                <h1 class="mb-4">Запись пациента на прием</h1>
                 
+                {% partial 'site/help' %}
+
+                <br>
                 <ul>
                   <li>Зарегистрирован: {{ patient.created_at | date('d.m.Y') }} </li>
                   <li>Активирован: {{ patient.activated_at | date('d.m.Y') }} </li>
                   <li>Обновлен: {{ patient.updated_at | date('d.m.Y') }} </li>
                   <li>Ближайший прием: {{ appointment.appointment_date|date('d.m.Y') }} </li>
-                  <li id="doctor-info">
-                      {% if patient.doctor_id %}
-                          <p>Лечащий врач (Постоянный): <a href="{{ 'edit-doctor' | page({ id: patient.doctor_id }) }}">{{ patient.doctor.name }} {{ patient.doctor.surname }}</a> </p>
-                          <button id="detach-doctor-button" class="btn btn-danger" onclick="detachDoctor({{ patient.id }})">Открепить врача</button>
-                      {% else %}
-                          <p>Лечащий врач (Постоянный): Не назначен</p>
-                      {% endif %}
-                  </li>
-
+                  
+                  {{ appointment_time|date('H:i') }}
                 </ul>
-                
-                
-                <br>
-                {% partial 'site/help' %}
-
-                
 
             </div>
             <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
@@ -92,19 +84,14 @@ patient_id = "{{ :patient_id }}"
                         </div>
 
                         <div class="col-sm-12">
-                            <select id="doctor_id" name="doctor_id" class="form-select border-0" style="height: 55px;" {% if patient.doctor_id %} disabled {% endif %}>
-                                <option disabled selected>Назначить постоянного лечащего врача</option>
-                                {% for doctor in patientManagement.loadDoctorsList() %}
-                                    <option value="{{ doctor.id }}">{{ doctor.name }} {{ doctor.surname }} ({{ doctor.iu_job }})</option>
-                                {% endfor %}
-                            </select>
-                        </div>
 
-                        <div class="col-sm-12">
-                            <div id="make_primary_container" style="display: none;">
-                                <input type="checkbox" id="make_primary" name="make_primary">
-                                <label for="make_primary">Сделать постоянным лечащим врачом</label>
-                            </div>
+                          <select id="doctor_id" name="doctor_id" required class="form-select border-0" style="height: 55px;">
+                            <option selected>Выберите врача</option>
+                              <option value="{{ patient.doctor_id }}"> </option>
+                            {% for doctor in patientManagement.loadDoctorsList() %}
+                                <option value="{{ doctor.id }}" {% if doctor.id == currentAppointment.doctor_id %} selected {% endif %}>{{ doctor.name }} {{ doctor.surname }} ({{doctor.iu_job}})</option>
+                            {% endfor %}
+                          </select>
                         </div>
 
                         {# <div class="col-12 col-sm-6">

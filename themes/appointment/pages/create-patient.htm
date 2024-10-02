@@ -37,14 +37,23 @@ is_hidden = 0
                               <input class="form-control border-0" type="text" id="iu_telephone" name="iu_telephone" placeholder="Телефон" required style="height: 55px;">
                           </div>
 
-                          <div class="col-sm-12">
-                              <select id="doctor_id" name="doctor_id" required class="form-select border-0" style="height: 55px;">
-                                <option selected="">Выберите врача</option>
-                                {% for doctor in patientManagement.loadDoctorsList() %}
-                                    <option value="{{ doctor.id }}">{{ doctor.name }} {{ doctor.surname }} ({{doctor.iu_job}})</option>
-                                {% endfor %}
-                            </select>
+                           <div class="col-sm-12">
+                            
+                            <select id="doctor_id" name="doctor_id" class="form-select border-0" style="height: 55px;">
+                              <option selected="">Выберите врача</option>
+                              {% for doctor in patientManagement.loadDoctorsList() %}
+                                  <option value="{{ doctor.id }}">{{ doctor.name }} {{ doctor.surname }} ({{ doctor.iu_job }})</option>
+                              {% endfor %}
+                          </select>
+                          
+                        </div>
+
+                        <div class="col-sm-12">
+                            <div id="make_primary_container" style="display: none;">
+                              <input type="checkbox" id="make_primary" name="make_primary">
+                              <label for="make_primary">Сделать основным врачом</label>
                           </div>
+                        </div>
 
                           <div class="col-12 col-sm-6">
                               <div class="input-group" id="datepicker">

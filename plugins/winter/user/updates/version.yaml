@@ -155,3 +155,27 @@
 2.0.26:
     - 'Updated table winter_user_visit_histories'
     - builder_table_update_winter_user_visit_histories_8.php
+2.0.27:
+    - 'Updated table winter_user_visit_histories'
+    - builder_table_update_winter_user_visit_histories_9.php
+2.0.28:
+    - 'Updated table winter_user_users'
+    - builder_table_update_winter_user_users_6.php
+2.0.29:
+    - 'Updated table winter_user_users'
+    - builder_table_update_winter_user_users_7.php
+2.0.30:
+    - 'Updated table winter_user_visit_histories'
+    - builder_table_update_winter_user_visit_histories_10.php
+2.0.31:
+    - 'Updated table winter_user_visit_histories'
+    - builder_table_update_winter_user_visit_histories_11.php
+2.0.32:
+    - 'Updated table winter_user_visit_histories'
+    - builder_table_update_winter_user_visit_histories_12.php
+2.0.33:
+    - 'Updated table winter_user_visit_histories'
+    - builder_table_update_winter_user_visit_histories_13.php
+2.0.34:
+    - 'Updated table winter_user_users'
+    - builder_table_update_winter_user_users_8.php

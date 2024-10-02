@@ -10,75 +10,30 @@ redirect = "/login"
 ==
 
 
-<div class="container-xxl py-5">
-  <div class="container">
-    <h2>Вид списка</h2>
-    <div class="btn btn-warning table-visible-js">Таблица</div>
-    <div class="btn btn-warning tile-visible-js">Плитка</div>
-    
-    <br>
-    <br>
-    <br>
+<div class="container py-5">
+    <h2>Список врачей</h2>
+
+    <!-- Поле поиска врачей -->
+    <div class="mb-3">
+        <input type="text" id="doctor_search" class="form-control" placeholder="Введите имя, фамилию или специальность">
+    </div>
     <br>
 
-      <div class="table-list">
-      <h2>Список врачей</h2>
-
-      <br>
-      <!-- Форма поиска пациентов -->
-      <div class="mb-3">
-          <input type="text" id="doctor_search" class="form-control" placeholder="Введите имя, фамилию или телефон пациента">
-      </div>
-      <br>
-
-      <table class="table">
-          <thead>
-              <tr>
-                  <th>Имя</th>
-                  <th>Фамилия</th>
-                  <th>Email</th>
-                  <th>Телефон</th>
-                  <th>Должность</th>
-                  <th>Статус</th>
-                  <th>Действия</th>
-              </tr>
-          </thead>
-          <tbody id="doctor_list">
-              {% partial 'doctor_list' doctors=doctors %}
-          </tbody>
-      </table>
-      </div>
-    <div class="tile-list" style="display:none">
-      <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px; visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
-          <p class="d-inline-block border rounded-pill py-1 px-4">Врачи</p>
-          <h1>Наши опытные врачи</h1>
-      </div>
-      <div class="row g-4">
-
-        {% for doctor in doctors %}
-          <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s" style="visibility: visible; animation-delay: 0.1s; animation-name: fadeInUp;">
-              <div class="team-item position-relative rounded overflow-hidden">
-                  <div class="overflow-hidden">
-                      {% if doctor.avatar %}
-                          <img class="img-fluid" src="{{doctor.avatar.path | resize(516, 600, { mode: 'crop', quality: '80', extension: 'webp' })}}" alt="">
-                      {% else %}
-                          <img class="img-fluid" src="{{ 'assets/images/default-doctor.webp'|theme | resize(516, 600, { mode: 'crop', quality: '80', extension: 'webp' })}}" alt="">
-                      {% endif %}
-                  </div>
-                  <div class="team-text bg-light text-center p-4">
-                      <h5>{{ doctor.name }} {{ doctor.surname }}</h5>
-                      <p class="text-primary">{{ doctor.iu_job }}</p>
-                      <div class="team-social text-center">
-                          <a href="{{ 'edit-doctor' | page({ id: doctor.id }) }}" class="btn btn-square"><i class="fas fa-pen"></i></a>
-                      </div>
-                  </div>
-              </div>
-          </div>
-          {% else %}
-            Врачи не найдены.
-        {% endfor %}
-      
-      </div>
-  </div>
-</div>
+    <!-- Таблица врачей -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Имя</th>
+                <th>Фамилия</th>
+                <th>Специальность</th>
+                <th>Телефон</th>
+                <th>Специальность</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="doctor_list">
+            {% partial 'doctor_list' doctors=doctors %}
+        </tbody>
+    </table>
 </div>

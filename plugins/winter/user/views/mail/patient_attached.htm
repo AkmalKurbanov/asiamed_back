@@ -1,4 +1,4 @@
 <h1>Новый пациент прикреплен</h1>
 <p>Здравствуйте, {{ doctor.name }}!</p>
 <p><b>К вам был прикреплен новый пациент</b>: {{ patient.name }} {{ patient.surname }}.</p>
-<p><b>Дата записи</b>: {{ appointment.appointment_date }} {{ appointment.appointment_time }}</p>
+<p><b>Дата записи</b>: {{ appointment.appointment_date| date(d.m.Y) }} {{ appointment.appointment_time }}</p>

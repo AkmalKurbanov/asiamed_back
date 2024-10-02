@@ -12,34 +12,26 @@ redirect = "/login"
 
 <div class="container py-5">
     <h2>Список пациентов</h2>
-    
+
+    <!-- Поле поиска для администратора и врача -->
+    <div class="mb-3">
+        <input type="text" id="patient_search" class="form-control" placeholder="Введите имя, фамилию или телефон пациента">
+    </div>
+    <br>
+
+    <!-- Таблица пациентов -->
     <table class="table">
         <thead>
             <tr>
                 <th>Имя</th>
                 <th>Фамилия</th>
+                <th>Дата рождения</th>
                 <th>Телефон</th>
                 <th>Действия</th>
             </tr>
         </thead>
-        <tbody>
-            {% for patient in patients %}
-            <tr>
-                <td>{{ patient.name }}</td>
-                <td>{{ patient.surname }}</td>
-                <td>{{ patient.iu_telephone }}</td>
-                <td>
-                    <!-- Ссылка на страницу с детальной информацией о пациенте -->
-                    <a href="{{ 'visit_history' | page({ patient_id: patient.id }) }}" class="btn btn-primary">
-                        Просмотреть
-                    </a>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="4">Пациенты не найдены.</td>
-            </tr>
-            {% endfor %}
+        <tbody id="patient_list">
+            {% partial 'patient_list' patients=patients %}
         </tbody>
     </table>
 </div>
