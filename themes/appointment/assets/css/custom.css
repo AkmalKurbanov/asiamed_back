@@ -1,0 +1,21 @@
+.reset-pass-custom-image {
+  max-width: 80px;
+  min-width: 80px;
+  height: 80px;
+  overflow: hidden;
+  border-radius: 100%;
+}
+
+
+.reset-pass-custom-image img{
+  position: absolute;
+  width: 80%!important;
+  height: 80%!important;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  object-fit: contain;
+  object-position: center;
+  overflow: visible;
+  border-radius: 0!important;
+}

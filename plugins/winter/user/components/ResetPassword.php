@@ -99,41 +99,41 @@ class ResetPassword extends ComponentBase
      * Perform the password reset
      */
     public function onResetPassword()
-    {
-        $rules = [
-            'code'     => 'required',
-            'password' => 'required|between:' . UserModel::getMinPasswordLength() . ',255'
-        ];
+{
+    $rules = [
+        'code'     => 'required',
+        'password' => 'required|between:' . UserModel::getMinPasswordLength() . ',255'
+    ];
 
-        $validation = Validator::make(post(), $rules);
-        if ($validation->fails()) {
-            throw new ValidationException($validation);
-        }
-
-        $errorFields = ['code' => Lang::get(/*Invalid activation code supplied.*/'winter.user::lang.account.invalid_activation_code')];
-
-        /*
-         * Break up the code parts
-         */
-        $parts = explode('!', post('code'));
-        if (count($parts) != 2) {
-            throw new ValidationException($errorFields);
-        }
-
-        list($userId, $code) = $parts;
-
-        if (!strlen(trim($userId)) || !strlen(trim($code)) || !$code) {
-            throw new ValidationException($errorFields);
-        }
-
-        if (!$user = Auth::findUserById($userId)) {
-            throw new ValidationException($errorFields);
-        }
-
-        if (!$user->attemptResetPassword($code, post('password'))) {
-            throw new ValidationException($errorFields);
-        }
+    $validation = Validator::make(post(), $rules);
+    if ($validation->fails()) {
+        throw new ValidationException($validation);
     }
+
+    $errorFields = ['code' => Lang::get(/*Invalid activation code supplied.*/'winter.user::lang.account.invalid_activation_code')];
+
+    /*
+     * Break up the code parts
+     */
+    $parts = explode('!', post('code'));
+    if (count($parts) != 2) {
+        throw new ValidationException($errorFields);
+    }
+
+    list($userId, $code) = $parts;
+
+    if (!strlen(trim($userId)) || !strlen(trim($code)) || !$code) {
+        throw new ValidationException($errorFields);
+    }
+
+    if (!$user = Auth::findUserById($userId)) {
+        throw new ValidationException($errorFields);
+    }
+
+    if (!$user->attemptResetPassword($code, post('password'))) {
+        throw new ValidationException($errorFields);
+    }
+}
 
     //
     // Helpers

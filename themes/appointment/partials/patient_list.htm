@@ -1,22 +1,43 @@
-{% for patient in patients %}
-<tr>
-    <td>{{ patient.name }}</td>
-    <td>{{ patient.surname }}</td>
-    <td>{{ patient.birthdate }}</td>
-    <td>{{ patient.iu_telephone }}</td>
-    <td style="text-align: end">
-
-        <a href="{{ 'edit-patient' | page({ patient_id: patient.id }) }}" class="btn btn-warning" style="margin-right: 20px">Редактировать</a>
-        <a href="{{ 'appointment-patient' | page({ patient_id: patient.id }) }}" class="btn btn-primary">Записать на прием</a>
-    </td>
-</tr>
+{% if patients is not empty %}
+  {% for patient in patients %}
+    <tr>
+      <td>{{ patient.name }}</td>
+      <td>{{ patient.surname }}</td>
+      <td>{{ patient.birthdate|date('d.m.Y') }}</td>
+      <td>{{ patient.iu_telephone }}</td>
+      {% if show_doctor %}
+        <td>{{ patient.doctor ? patient.doctor.name : 'Не назначен' }}</td>
+      {% endif %}
+      
+      {% if this.page.fileName == 'doctor-booked-patients.htm' %}
+       
+        {% if patient.appointments is not empty %}
+          {% for appointment in patient.appointments %}
+            <td>{{ appointment.appointment_date|date('d.m.Y') }}</td>
+          {% endfor %}
+        {% else %}
+            <p>Нет записей на прием</p>
+        {% endif %}
+      
+      {% else %}
+      {% endif %}
+      
+      
+      <td>
+        <div class="btn-group">
+          <button type="button" class="btn btn-success dropdown-toggle dropdown-hover dropdown-icon" data-toggle="dropdown">
+            <span>Открыть</span>
+          </button>
+          <div class="dropdown-menu" role="menu">
+            <a class="dropdown-item" href="{{ 'edit-patient' | page({ patient_id: patient.id }) }}">Редактировать профиль</a>
+            <a class="dropdown-item" href="{{ 'appointment-patient' | page({ patient_id: patient.id }) }}">Записать на прием</a>
+          </div>
+        </div>
+      </td>
+    </tr>
+  {% endfor %}
 {% else %}
-<tr>
-    <td colspan="5">Пациенты не найдены.</td>
-    
-</tr>
-{% endfor %}
-
-
-
-
+  <tr>
+    <td colspan="6">Пациенты не найдены.</td>
+  </tr>
+{% endif %}

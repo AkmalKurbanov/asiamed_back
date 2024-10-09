@@ -1,0 +1,114 @@
+title = "Список пациентов"
+url = "/list-all-patients"
+layout = "adminLTE"
+
+[patientManagement]
+
+[session]
+security = "user"
+redirect = "/login"
+==
+
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Список пациентов</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Simple Tables</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        
+        <!-- /.row -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Таблица пациентов</h3>
+
+                <div class="card-tools">
+                  <div class="input-group input-group-sm" style="width: 150px;">
+                    <input id="patient_search" type="text" name="table_search" class="form-control float-right" placeholder="Поиск">
+                  </div>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0" style="height: 300px;">
+                <table class="table table-head-fixed text-nowrap">
+                  <thead>
+                    <tr>
+                        <th>Имя</th>
+                        <th>Фамилия</th>
+                        <th>Дата рождения</th>
+                        <th>Телефон</th>
+                        <th>Лечащий врач(постоянный)</th>
+                        <th>Действия</th>
+                    </tr>
+                  </thead>
+                  <tbody id="patient_list">
+                    {% partial 'patient_list' patients=patients %}
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+        </div>
+        <!-- /.row -->
+        
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+
+
+
+
+{# <div class="container py-5">
+    <h2>Список пациентов</h2>
+
+    <!-- Поле поиска для администратора и врача -->
+    <div class="mb-3">
+        <input type="text" id="patient_search" class="form-control" placeholder="Введите имя, фамилию или телефон пациента">
+    </div>
+    <br>
+
+    <!-- Таблица пациентов -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Имя</th>
+                <th>Фамилия</th>
+                <th>Дата рождения</th>
+                <th>Телефон</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody id="patient_list">
+            {% partial 'patient_list' patients=patients %}
+        </tbody>
+    </table>
+    <br>
+    <br>
+    {% for group in user.groups %}
+    {% if group.code == 'admins' %}
+    <div style="float: right">
+      <a href="{{ 'create-patient' | page }}" class="btn btn-warning">Создать пациента</a>
+    </div>
+    {% endif %}
+  {% endfor %}
+</div> #}

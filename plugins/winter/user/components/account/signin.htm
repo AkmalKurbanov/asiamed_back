@@ -1,40 +1,39 @@
 {{ form_ajax('onSignin') }}
 
-    <div class="bg-light rounded h-100 d-flex align-items-center p-5" style="padding-bottom: 0!important;">
-     <div class="row g-3">
-        <div class="col-sm-12">
-            <input
-            name="login"
-            type="text"
-            class="form-control border-0"
-            id="userSigninLogin"
-            placeholder="Введите ваш {{ loginAttributeLabel|lower }}" 
-            style="height: 55px;"
-            />
-          
+    <div class="input-group mb-3">
+          <input type="email" class="form-control" name="login" id="userSigninLogin" placeholder="Email">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-envelope"></span>
+            </div>
+          </div>
         </div>
-        <div class="col-sm-12">
-           <input
-            name="password"
-            type="password"
-            class="form-control  border-0"
-            id="userSigninPassword"
-            placeholder="Введите пароль" 
-             style="height: 55px;"
-            />
-            
+        <div class="input-group mb-3">
+          <input type="password" class="form-control" name="password" id="userSigninPassword" placeholder="Пароль">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-8">
+            <div class="icheck-primary">
+              <input type="checkbox" id="remember" name="remember" value="1">
+              <label for="remember">
+                Запомнить меня
+              </label>
+            </div>
+          </div>
+          <!-- /.col -->
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary btn-block">Войти</button>
+          </div>
+          <!-- /.col -->
         </div>
 
 
-         
-         <div class="col-12">
-            <button class="btn btn-primary w-100 py-3" type="submit">Войти</button>
-        </div>
-
-     </div>
-     </div>
-
-
+   
     {% if rememberLoginMode == 'ask' %}
     <div class="form-group">
         <div class="checkbox">
@@ -42,6 +41,10 @@
         </div>
     </div>
     {% endif %}
+
+    <p class="mb-1">
+        <a href="{{'reset-password'|page}}">Я забыл пароль</a>
+      </p>
 
     
 

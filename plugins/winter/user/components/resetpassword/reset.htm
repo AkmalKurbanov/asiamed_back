@@ -1,25 +1,46 @@
-<p class="lead">
-    Пожалуйста, проверьте свою электронную почту, чтобы получить код активации.
-</p>
+<form data-request="{{ __SELF__ }}::onResetPassword" data-request-update="'{{ __SELF__ }}::complete': '#partialUserResetForm'" id="resetPasswordForm">
+  <div class="lockscreen-item">
+    <div class="lockscreen-image">
+        <img
+            src="{{'assets/dist/img/user1-128x128.jpg'|theme}}"
+            alt="User Image"
+        />
+    </div>
 
-<form
-    data-request="{{ __SELF__ }}::onResetPassword"
-    data-request-update="'{{ __SELF__ }}::complete': '#partialUserResetForm'">
-    <div class="row g-3">
-    <div class="form-group">
-        <div class="col-sm-12">
-            <input name="code" type="text" class="form-control border-0" id="resetCode" placeholder="Введите код активации" value="{{ __SELF__.code }}" style="height: 55px;">
+    <div class="lockscreen-credentials">
+        <div class="input-group">
+            <input
+                name="code"
+                id="resetCode"
+                type="text"
+                class="form-control"
+                placeholder="Введите код активации"
+                value="{{ __SELF__.code }}"
+            />
         </div>
     </div>
+  </div>  
 
-    <div class="form-group">
-        <div class="col-sm-12">
-            <input name="password" type="password" class="form-control border-0" id="resetPassword" placeholder="Введите новый пароль" style="height: 55px;">
-        </div>
+  <div class="lockscreen-item">
+    <input
+        name="password"
+        id="resetPassword"
+        type="password"
+        class="form-control"
+        placeholder="Введите новый пароль"
+    />
+  </div>
+
+    <div class="mb-2 d-flex justify-content-center">
+      <button type="submit" class="btn btn-primary">Сбросить пароль</button>
     </div>
 
-    <div class="col-sm-12">
-        <button type="submit" class="btn btn-primary w-100 py-3">Сбросить пароль</button>
-    </div>
-    </div>
+  
 </form>
+
+<div class="help-block text-center">
+    <p>
+        Пожалуйста, проверьте свою электронную почту, чтобы получить код
+        активации.
+    </p>
+</div>

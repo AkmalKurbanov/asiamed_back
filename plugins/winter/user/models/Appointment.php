@@ -9,12 +9,6 @@ class Appointment extends Model
 
     public $belongsTo = [
         'patient' => ['Winter\User\Models\User', 'key' => 'patient_id'], // Связь с пациентом
-        'doctor' => ['Winter\User\Models\User', 'key' => 'doctor_id']  // Связь с врачом
+        'doctor' => ['Winter\User\Models\User', 'key' => 'doctor_id']    // Связь с врачом
     ];
-
-    public function patient()
-{
-    return $this->belongsTo(User::class, 'patient_id');
-}
-
 }

@@ -1,22 +1,22 @@
-subject = "Requested Password Reset"
-description = "User requests a password reset"
+subject = "Запрошен сброс пароля"
+description = "Пользователь запрашивает сброс пароля"
 ==
-Hello {{ name }}
+Здравстуйте!, {{ name }}
 
-Somebody has requested a password reset for your account, if this was not you, please ignore this email.
+Кто-то запросил сброс пароля для вашей учетной записи. Если это были не вы, пожалуйста, проигнорируйте это письмо.
 
-Use this activation code to restore your password:
+Используйте этот код активации для восстановления пароля:
 
 {% partial 'promotion' body %}
 {{ code }}
 {% endpartial %}
 
-You can use the following link:
+Вы можете воспользоваться следующей ссылкой:
 
 {% partial 'button' url=link type='positive' body %}
-Restore password
+Восстановить пароль
 {% endpartial %}
 
 {% partial 'subcopy' body %}
-    **This is an automatic message. Please do not reply to it.**
+    **Это автоматическое сообщение. Пожалуйста, не отвечайте на него.**
 {% endpartial %}

@@ -33,6 +33,11 @@ class DoctorManagement extends ComponentBase
         } else {
             $this->loadDoctorsList();  // Загружаем список всех врачей
         }
+        
+        
+      
+
+
     }
 
     // Загружаем список врачей

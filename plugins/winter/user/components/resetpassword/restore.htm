@@ -1,15 +1,38 @@
-<p class="lead">
-    <strong>Забыли пароль?</strong> Без проблем! Введите свой адрес электронной почты, чтобы подтвердить свою учетную запись.
-</p>
-
-<form
-    data-request="{{ __SELF__ }}::onRestorePassword"
-    data-request-update="'{{ __SELF__ }}::reset': '#partialUserResetForm'">
-    <div class="form-group">
-        <div class="col-sm-12">
-        <input name="email" type="email" class="form-control form-control border-0" id="userRestoreEmail" placeholder="Введите ваш email" style="height: 55px; margin-bottom: 20px">
-        </div>
+<div class="lockscreen-item">
+    <!-- lockscreen image -->
+    <div class="lockscreen-image reset-pass-custom-image">
+        <img
+            src="{{'assets/images/logo.svg'|theme}}"
+            alt="User Image"
+        />
     </div>
 
-     <button class="btn btn-primary w-100 py-3" type="submit">Сбросить пароль</button>
-</form>
+    <form
+        class="lockscreen-credentials validate-form"
+        data-request="{{ __SELF__ }}::onRestorePassword"
+        data-request-update="'{{ __SELF__ }}::reset': '#partialUserResetForm'"
+    >
+        <div class="input-group form-group m-0">
+            <input
+                name="email"
+                type="email"
+                id="userRestoreEmail"
+                class="form-control"
+                placeholder="Email"
+            />
+
+            <div class="input-group-append">
+                <button type="submit" class="btn">
+                    <i class="fas fa-arrow-right text-muted"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="help-block text-center">
+    <p>
+        <strong>Забыли пароль?</strong> Без проблем! Введите свой адрес
+        электронной почты, чтобы подтвердить свою учетную запись.
+    </p>
+</div>

@@ -1,0 +1,101 @@
+description = "AdminLTE layout"
+==
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdminLTE 3 | Dashboard 2</title>
+
+  <!-- Favicon -->
+  <link href="{{ 'assets/images/favicon.ico'|theme }}" rel="icon">
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="{{'assets/plugins/fontawesome-free/css/all.min.css'|theme}}">
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="{{'assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css'|theme}}">
+
+  {% if this.page.fileName  == 'create-patient.htm' %}
+<link rel="stylesheet" href="{{'assets/plugins/select2/css/select2.min.css'|theme}}">
+<link rel="stylesheet" href="{{'assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css'|theme}}">
+<link rel="stylesheet" href="{{'assets/plugins/toastr/toastr.min.css'|theme}}">
+<link rel="stylesheet" href="{{'assets/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css'|theme}}">
+<link rel="stylesheet" href="{{'assets/plugins/fullcalendar/main.css'|theme}}">
+  {% else %}
+  {% endif %}
+
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{{'assets/dist/css/adminlte.min.css'|theme}}">
+  <link rel="stylesheet" href="{{'assets/css/custom.css'|theme}}">
+  
+  {% styles %}
+</head>
+
+{% if this.page.fileName == 'create-patient.htm' %}
+  <body class="hold-transition register-page">
+  
+  {% elseif this.page.fileName == 'login.htm' %}
+    <body class="hold-transition login-page">
+
+  {% elseif this.page.fileName == 'reset-password.htm' %}
+    <body class="hold-transition lockscreen">
+  
+  {% else %}
+    <body>
+  
+  {% endif %}  
+  
+  <!-- Content -->
+    {% page %}
+
+
+<!-- REQUIRED SCRIPTS -->
+<!-- jQuery -->
+<script src="{{'assets/plugins/jquery/jquery.min.js'|theme}}"></script>
+<!-- Bootstrap -->
+<script src="{{'assets/plugins/bootstrap/js/bootstrap.bundle.min.js'|theme}}"></script>
+<!-- overlayScrollbars -->
+<script src="{{'assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js'|theme}}"></script>
+
+<!-- PAGE PLUGINS -->
+<!-- jQuery Mapael -->
+<script src="{{'assets/plugins/jquery-mousewheel/jquery.mousewheel.js'|theme}}"></script>
+<script src="{{'assets/plugins/raphael/raphael.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/jquery-mapael/jquery.mapael.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/jquery-mapael/maps/usa_states.min.js'|theme}}"></script>
+<!-- ChartJS -->
+<script src="{{'assets/plugins/chart.js/Chart.min.js'|theme}}"></script>
+<!-- AdminLTE App -->
+<script src="{{'assets/dist/js/adminlte.js'|theme}}"></script>
+
+{# <!-- AdminLTE for demo purposes -->
+<script src="dist/js/demo.js"></script>
+<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+<script src="dist/js/pages/dashboard2.js"></script> #}
+<script src="{{'assets/plugins/jquery-validation/jquery.validate.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/jquery-validation/additional-methods.min.js'|theme}}"></script>
+
+{% if this.page.fileName  == 'create-patient.htm' %}
+<script src="{{'assets/plugins/select2/js/select2.full.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/select2/js/i18n/ru.js'|theme}}"></script>
+<script src="{{'assets/plugins/toastr/toastr.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/jquery-validation/jquery.validate.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/jquery-validation/additional-methods.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/moment/moment.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/tempusdominus-bootstrap-4/js/locale/ru.js'|theme}}"></script>
+<script src="{{'assets/plugins/inputmask/jquery.inputmask.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/fullcalendar/main.js'|theme}}"></script>
+  {% else %}
+
+{% endif %} 
+
+
+<script src="{{'assets/javascript/custom.js'|theme}}"></script> 
+  {% snowboard all %}
+  {% framework %}
+  {% scripts %}
+</body>
+</html>
