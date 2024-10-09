@@ -36,6 +36,13 @@ redirect = "login"
   {% else %}
   {% endif %}
 
+  {% if this.page.fileName  == 'admin-calendar.htm' %}
+<link rel="stylesheet" href="{{'assets/plugins/fullcalendar/main.css'|theme}}">
+<link rel="stylesheet" href="{{'assets/plugins/toastr/toastr.min.css'|theme}}">
+  {% else %}
+
+{% endif %} 
+
   <!-- Theme style -->
   <link rel="stylesheet" href="{{'assets/dist/css/adminlte.min.css'|theme}}">
   <link rel="stylesheet" href="{{'assets/css/custom.css'|theme}}">
@@ -74,7 +81,7 @@ redirect = "login"
           <img src="{{'assets/dist/img/user2-160x160.jpg'|theme}}" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="{{'profile'|page}}" class="d-block">Alexander Pierce</a>
+          <a href="{{'profile'|page}}" class="d-block">{{user.name}} {{user.surname}}</a>
         </div>
       </div>
 
@@ -353,7 +360,7 @@ redirect = "login"
           </li>
           <li class="nav-header">EXAMPLES</li>
           <li class="nav-item">
-            <a href="pages/calendar.html" class="nav-link">
+            <a href="" class="nav-link">
               <i class="nav-icon fas fa-calendar-alt"></i>
               <p>
                 Calendar
@@ -763,6 +770,9 @@ redirect = "login"
 <!-- ChartJS -->
 <script src="{{'assets/plugins/chart.js/Chart.min.js'|theme}}"></script>
 <!-- AdminLTE App -->
+
+
+
 <script src="{{'assets/dist/js/adminlte.js'|theme}}"></script>
 
 {# <!-- AdminLTE for demo purposes -->
@@ -783,6 +793,19 @@ redirect = "login"
 <script src="{{'assets/plugins/tempusdominus-bootstrap-4/js/locale/ru.js'|theme}}"></script>
 {% else %}
 {% endif %}
+
+{% if this.page.fileName  == 'admin-calendar.htm' %}
+<script src="{{'assets/plugins/jquery-ui/jquery-ui.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/fullcalendar/main.js'|theme}}"></script>
+<script src="{{'assets/plugins/moment/moment.min.js'|theme}}"></script>
+<script src="{{'assets/javascript/calendar.js'|theme}}"></script>
+<script src="{{'assets/plugins/toastr/toastr.min.js'|theme}}"></script>
+  
+  
+
+  {% else %}
+
+{% endif %} 
 
 <script src="{{'assets/javascript/custom.js'|theme}}"></script> 
   {% snowboard all %}

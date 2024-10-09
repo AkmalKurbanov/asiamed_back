@@ -128,24 +128,9 @@ class PatientManagement extends ComponentBase
                 throw new ApplicationException('Пожалуйста, введите фамилию.');
             }
 
-            if (empty($data['iu_telephone'])) {
-                throw new ApplicationException('Пожалуйста, введите номер телефона.');
-            }
-
-            // Проверка поля doctor_id, чтобы исключить значение по умолчанию "Выберите врача"
-            if (!empty($data['doctor_id']) && $data['doctor_id'] === 'Выберите врача') {
-                throw new ApplicationException('Пожалуйста, выберите врача из списка.');
-            }
-
-            // Проверка наличия даты и времени, если указан doctor_id
-            if (!empty($data['doctor_id'])) {
-                if (empty($data['appointment_date'])) {
-                    throw new ApplicationException('Пожалуйста, выберите дату приема.');
-                }
-
-                if (empty($data['appointment_time'])) {
-                    throw new ApplicationException('Пожалуйста, выберите время приема.');
-                }
+            // Проверка наличия типа визита
+            if (empty($data['visit_type'])) {
+                throw new ApplicationException('Пожалуйста, выберите тип визита.');
             }
 
             // Транслитерация имени и фамилии для создания уникального email
@@ -163,7 +148,7 @@ class PatientManagement extends ComponentBase
             $patient = new User();
             $patient->name = $data['name'];
             $patient->surname = $data['surname'];
-            $patient->iu_telephone = $data['iu_telephone'];
+            $patient->iu_telephone = !empty($data['iu_telephone']) ? $data['iu_telephone'] : null;
             $patient->email = $fakeEmail;
             $patient->password = $generatedPassword;
             $patient->password_confirmation = $generatedPassword;
@@ -178,31 +163,34 @@ class PatientManagement extends ComponentBase
                 $patient->groups()->add($group);
             }
 
-            // Проверяем, установлен ли чекбокс "Сделать основным врачом"
-            if (!empty($data['doctor_id']) && !empty($data['make_primary'])) {
-                $patient->doctor_id = $data['doctor_id'];
-                $patient->save();
+            // Запись на прием к врачу
+            $doctorId = !empty($data['doctor_id']) ? $data['doctor_id'] : null; // Установите в null, если пусто
+            if ($data['visit_type'] === 'амбулаторный') {
+                // Создаем запись для амбулаторного визита
+                $appointment = $this->createAppointment($patient, $doctorId, null, null, $data['visit_type']);
+            } else if ($data['visit_type'] === 'стационарный' && $doctorId) {
+                // Создаем запись для стационарного визита
+                $appointment = $this->createAppointment($patient, $doctorId, $data['appointment_date'], $data['appointment_time'], $data['visit_type']);
             }
 
-            // Запись на прием к врачу, если doctor_id указан
-            if (!empty($data['doctor_id'])) {
-                $appointment = $this->createAppointment($patient, $data['doctor_id'], $data['appointment_date'], $data['appointment_time']);
-                
-                // Отправляем уведомление врачу
-                $doctor = User::find($data['doctor_id']);
-                Mail::send('winter.user::mail.patient_attached', [
-                    'patient' => $patient,
-                    'doctor' => $doctor,
-                    'appointment' => $appointment
-                ], function ($message) use ($doctor) {
-                    $message->to($doctor->email);
-                    $message->subject('Новый пациент прикреплен к вам');
-                });
+            // Отправляем уведомление врачу, если doctor_id указан
+            if ($doctorId) {
+                $doctor = User::find($doctorId);
+                if ($doctor) {
+                    Mail::send('winter.user::mail.patient_attached', [
+                        'patient' => $patient,
+                        'doctor' => $doctor,
+                        'appointment' => $appointment
+                    ], function ($message) use ($doctor) {
+                        $message->to($doctor->email);
+                        $message->subject('Новый пациент прикреплен к вам');
+                    });
+                }
             }
 
             return [
                 'error' => false,
-                'message' => 'Пациент успешно создан и прикреплен к врачу.'
+                'message' => 'Пациент успешно создан.' . (!empty($doctorId) ? ' Запись на прием успешно создана.' : '')
             ];
 
         } catch (\Exception $e) {
@@ -213,23 +201,27 @@ class PatientManagement extends ComponentBase
             ];
         }
     }
-
-
-
-
-
+    
     // Создание записи на приём
-    protected function createAppointment($patient, $doctorId, $appointmentDate, $appointmentTime)
-{
-    $appointment = new Appointment();
-    $appointment->patient_id = $patient->id;
-    $appointment->doctor_id = $doctorId;
-    $appointment->appointment_date = Carbon::parse($appointmentDate);
-    $appointment->appointment_time = Carbon::parse($appointmentTime);
-    $appointment->save();
+    protected function createAppointment($patient, $doctorId = null, $appointmentDate = null, $appointmentTime = null, $visitType)
+    {
+        $appointment = new Appointment();
+        $appointment->visit_type = $visitType; // Устанавливаем тип визита
+        $appointment->patient_id = $patient->id;
+        $appointment->doctor_id = $doctorId; // Устанавливаем doctor_id, который может быть null
+        $appointment->appointment_date = $appointmentDate ? Carbon::parse($appointmentDate) : null; // Может быть null для амбулаторных визитов
+        $appointment->appointment_time = $appointmentTime ? Carbon::parse($appointmentTime) : null; // Может быть null для амбулаторных визитов
+        
+        try {
+            $appointment->save(); // Попытка сохранить запись
+        } catch (\Exception $e) {
+            \Log::error('Ошибка при сохранении записи приема: ' . $e->getMessage());
+            throw new ApplicationException('Не удалось сохранить запись приема.');
+        }
 
-    return $appointment; // Возвращаем объект Appointment
-}
+        return $appointment; // Возвращаем объект Appointment
+    }
+
 
 
   public function onUpdatePatient()
@@ -410,47 +402,45 @@ public function onDetachDoctor()
     
 
     public function onGetBookedTimes()
-    {
-        $doctorId = post('doctor_id');
-        $selectedDate = post('selected_date');
+{
+    \Log::info('Запрос на получение забронированных времен');
 
-        if (!$doctorId || !$selectedDate) {
-            return [
-                'error' => true,
-                'message' => 'Доктор и дата должны быть выбраны.'
-            ];
-        }
+    $doctorId = post('doctor_id');
+    $selectedDate = post('selected_date');
 
-        // Получаем записи для выбранного доктора и даты
-        $appointments = Appointment::where('doctor_id', $doctorId)
-            ->whereDate('appointment_date', '>=', Carbon::now()->startOfDay()) // Только будущие даты
-            ->whereDate('appointment_date', '=', Carbon::parse($selectedDate)->toDateString())
-            ->get();
-
-        if ($appointments->isEmpty()) {
-            return [
-                'error' => false,
-                'times' => [],
-                'message' => 'Свободное время доступно на весь день.'
-            ];
-        }
-
-        $bookedTimes = $appointments->map(function ($appointment) {
-        if (is_string($appointment->appointment_time)) {
-            // Преобразуем в Carbon, если это строка
-            $appointmentTime = Carbon::parse($appointment->appointment_time);
-        } else {
-            // Если это уже объект времени, просто используем его
-            $appointmentTime = $appointment->appointment_time;
-        }
-        return $appointmentTime->format('H:i');
-        });
-
+    if (!$doctorId || !$selectedDate) {
+        \Log::error('Не указаны doctor_id или selected_date');
         return [
-            'error' => false,
-            'times' => $bookedTimes
+            'error' => true,
+            'message' => 'Доктор и дата должны быть выбраны.'
         ];
     }
+
+    // Получаем записи для выбранного доктора и даты
+    $appointments = Appointment::where('doctor_id', $doctorId)
+        ->whereDate('appointment_date', '>=', Carbon::now()->startOfDay())
+        ->whereDate('appointment_date', '=', Carbon::parse($selectedDate)->toDateString())
+        ->get();
+
+    \Log::info('Найдено записей: ' . $appointments->count());
+
+    if ($appointments->isEmpty()) {
+        return [
+            'error' => false,
+            'times' => [],
+            'message' => 'Свободное время доступно на весь день.'
+        ];
+    }
+
+    $bookedTimes = $appointments->map(function ($appointment) {
+        return Carbon::parse($appointment->appointment_time)->format('H:i'); // Извлекаем только часы и минуты
+    });
+
+    return [
+        'error' => false,
+        'times' => $bookedTimes
+    ];
+}
 
     public function onGetDoctorSchedule()
     {

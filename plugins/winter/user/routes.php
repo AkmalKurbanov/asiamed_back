@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Winter\User\Controllers\EventController;
 
 Route::group(['middleware' => ['auth', 'can:manage-users']], function () {
     // Маршрут для создания врача
@@ -14,4 +15,8 @@ Route::group(['middleware' => ['auth', 'can:manage-users']], function () {
     // Маршрут для создания пациента
     Route::get('/admin/patients/create', 'Winter\User\Controllers\PatientController@create')->name('admin.patients.create');
     Route::post('/admin/patients', 'Winter\User\Controllers\PatientController@store')->name('admin.patients.store');
+    
+    
+    // Определение маршрута для добавления события
+    Route::post('/events', [EventController::class, 'addEvent']);
 });

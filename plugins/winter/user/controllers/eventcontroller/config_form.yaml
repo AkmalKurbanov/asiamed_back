@@ -1,0 +1,31 @@
+# ===================================
+#  Form Behavior Config
+# ===================================
+
+# Record name
+name: 'winter.user::lang.models.eventcontroller.label'
+
+# Model Form Field configuration
+form: $/winter/user/models/eventcontroller/fields.yaml
+
+# Model Class name
+modelClass: Winter\User\Models\EventController
+
+# Default redirect location
+defaultRedirect: winter/user/eventcontroller
+
+# Create page
+create:
+    title: backend::lang.form.create_title
+    redirect: winter/user/eventcontroller/update/:id
+    redirectClose: winter/user/eventcontroller
+
+# Update page
+update:
+    title: backend::lang.form.update_title
+    redirect: winter/user/eventcontroller
+    redirectClose: winter/user/eventcontroller
+
+# Preview page
+preview:
+    title: backend::lang.form.preview_title
