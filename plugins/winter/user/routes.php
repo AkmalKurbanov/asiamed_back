@@ -17,6 +17,9 @@ Route::group(['middleware' => ['auth', 'can:manage-users']], function () {
     Route::post('/admin/patients', 'Winter\User\Controllers\PatientController@store')->name('admin.patients.store');
     
     
-    // Определение маршрута для добавления события
-    Route::post('/events', [EventController::class, 'addEvent']);
+    Route::get('/events', [EventController::class, 'index'])->name('events.index');
+    Route::post('/events', [EventController::class, 'store'])->name('events.store');
+    Route::put('/events/{id}', [EventController::class, 'update'])->name('events.update');
+    Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('events.destroy');
+    
 });

@@ -231,3 +231,27 @@
 2.0.38:
     - 'Create Events Table'
     - v2.0.38/create_events_table.php
+2.0.39:
+    - 'Updated table winter_user_events_table'
+    - builder_table_update_winter_user_events_table.php
+2.0.40:
+    - 'Updated table winter_user_events_table'
+    - builder_table_update_winter_user_events_table_2.php
+2.0.41:
+    - 'Updated table winter_user_events_table'
+    - builder_table_update_winter_user_events_table_3.php
+2.0.42:
+    - 'Updated table winter_user_events_table'
+    - builder_table_update_winter_user_events_table_4.php
+2.0.43:
+    - 'Updated table winter_user_events_table'
+    - builder_table_update_winter_user_events_table_5.php
+2.0.44:
+    - 'Updated table winter_user_events_table'
+    - builder_table_update_winter_user_events.php
+2.0.45:
+    - 'Updated table winter_user_events'
+    - builder_table_update_winter_user_events_2.php
+2.0.46:
+    - 'Created table winter_user_draggable_events'
+    - builder_table_create_winter_user_draggable_events.php

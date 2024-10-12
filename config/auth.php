@@ -1,6 +1,7 @@
 <?php
 
 return [
+  
     'throttle' => [
 
         /*
@@ -37,5 +38,7 @@ return [
         */
 
         'suspensionTime' => 15,
+
+        
     ],
 ];
