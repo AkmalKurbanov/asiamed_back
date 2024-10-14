@@ -59,40 +59,39 @@ class EventManagement extends ComponentBase
     }
     
     public function onLoadEvents()
-{
-    try {
-        $events = Event::all()->map(function ($event) {
-            // Конвертируем время из UTC в локальную временную зону Asia/Bishkek
-            $startTime = Carbon::parse($event->start_time, 'UTC')->setTimezone('Asia/Bishkek')->toIso8601String();
-            $endTime = $event->end_time ? Carbon::parse($event->end_time, 'UTC')->setTimezone('Asia/Bishkek')->toIso8601String() : null;
+    {
+        try {
+            $events = Event::all()->map(function ($event) {
+                // Конвертируем время из UTC в локальную временную зону Asia/Bishkek
+                $startTime = Carbon::parse($event->start_time, 'UTC')->setTimezone('Asia/Bishkek')->toIso8601String();
+                $endTime = $event->end_time ? Carbon::parse($event->end_time, 'UTC')->setTimezone('Asia/Bishkek')->toIso8601String() : null;
 
-            // Логируем для проверки
-            \Log::info('Загруженное событие: ID ' . $event->id);
-            \Log::info('Start time (UTC -> Asia/Bishkek): ' . $startTime);
-            \Log::info('End time (UTC -> Asia/Bishkek): ' . ($endTime ?? 'null'));
+                // Логируем для проверки
+                \Log::info('Загруженное событие: ID ' . $event->id);
+                \Log::info('Start time (UTC -> Asia/Bishkek): ' . $startTime);
+                \Log::info('End time (UTC -> Asia/Bishkek): ' . ($endTime ?? 'null'));
 
-            return [
-                'id' => $event->id,
-                'title' => $event->title,
-                'start' => $startTime,  // Отправляем конвертированное время
-                'end' => $endTime,      // Отправляем конвертированное время окончания (если есть)
-                'backgroundColor' => $event->color,
-                'borderColor' => $event->color,
-                'editable' => true,
-                'extendedProps' => [
-                    'event_id' => $event->id
-                ]
-            ];
-        });
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'start' => $startTime,  // Отправляем конвертированное время
+                    'end' => $endTime,      // Отправляем конвертированное время окончания (если есть)
+                    'backgroundColor' => $event->color,
+                    'borderColor' => $event->color,
+                    'editable' => true,
+                    'extendedProps' => [
+                        'event_id' => $event->id
+                    ]
+                ];
+            });
 
-        return ['events' => $events];
-    } catch (\Exception $e) {
-        \Log::error('Ошибка при загрузке событий: ' . $e->getMessage());
-        throw new ApplicationException('Ошибка при загрузке событий');
+            return ['events' => $events];
+        } catch (\Exception $e) {
+            \Log::error('Ошибка при загрузке событий: ' . $e->getMessage());
+            throw new ApplicationException('Ошибка при загрузке событий');
+        }
     }
-}
 
-    
     public function onUpdateEvent()
 {
     $data = post();
@@ -111,13 +110,17 @@ class EventManagement extends ComponentBase
             throw new ApplicationException('Событие не найдено.');
         }
 
-        // Конвертируем время в формат, который понимает MySQL
+        // Обновляем только start_time
         $event->start_time = Carbon::parse($data['start_time'])->format('Y-m-d H:i:s');
-        $event->end_time = !empty($data['end_time']) ? Carbon::parse($data['end_time'])->format('Y-m-d H:i:s') : null;
 
-        // Логируем данные после конвертации
-        \Log::info('Сохраненное время (start_time): ' . $event->start_time);
-        \Log::info('Сохраненное время (end_time): ' . ($event->end_time ?? 'null'));
+        // Если end_time передается и не пустое, обновляем его, иначе оставляем старое значение
+        if (!empty($data['end_time'])) {
+            $event->end_time = Carbon::parse($data['end_time'])->format('Y-m-d H:i:s');
+        }
+
+        // Логируем данные после обновления
+        \Log::info('Обновленное время (start_time): ' . $event->start_time);
+        \Log::info('Обновленное время (end_time): ' . ($event->end_time ?? 'null'));
 
         $event->save();
 
@@ -129,8 +132,6 @@ class EventManagement extends ComponentBase
         return ['error' => true, 'message' => 'Произошла ошибка при обновлении события.'];
     }
 }
-
-
 
 
     public function onDeleteEvent()

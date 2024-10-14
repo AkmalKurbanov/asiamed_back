@@ -51,7 +51,14 @@ $(function () {
     editable: true,
     droppable: true,
     eventDisplay: 'block',
-    nextDayThreshold: '23:59', 
+    nextDayThreshold: '23:59',
+
+    // Настройка формата отображения времени для событий
+    eventTimeFormat: {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false // Используем 24-часовой формат
+    },
 
     // Загрузка событий с сервера
     events: function (fetchInfo, successCallback, failureCallback) {
@@ -95,7 +102,7 @@ $(function () {
       var eventData = {
         event_id: info.event.extendedProps.event_id,
         start_time: newStartTime,
-        end_time: newEndTime
+        end_time: newEndTime // Передаем время окончания или null, если его нет
       };
 
       $.request('eventManagement::onUpdateEvent', {
@@ -176,7 +183,6 @@ $(function () {
 
   });
 
-  
   // Функция для обновления события
   function updateEvent(event) {
     var eventId = event.extendedProps ? event.extendedProps.event_id : null;
@@ -213,8 +219,6 @@ $(function () {
       }
     });
   }
-
-
 
   calendar.render();
 
@@ -272,8 +276,6 @@ $(function () {
     });
   });
 
-
-
   /* Выбор цвета */
   $('#color-chooser > li > a').click(function (e) {
     e.preventDefault();
@@ -321,9 +323,7 @@ $(function () {
     deleteEvent();
   });
 
-
-
-  // Обработка кнопки "Сохранить"
+  // Обработка кнопки "Сохранить" в модальном окне
   $('#save-event').click(function () {
     var eventTime = $('#event-time').val(); // Получаем новое время из поля
 
@@ -342,15 +342,19 @@ $(function () {
 
     var eventId = calendarEvent.extendedProps.event_id;
 
-    // Преобразуем время в объект Date и далее в ISO-формат
+    // Преобразуем время начала события в ISO-формат
     var updatedStartTime = new Date(eventTime).toISOString();
 
-    // Обновляем данные события с новым временем
+    // Проверяем, существует ли end_time у события
+    var existingEndTime = calendarEvent.end ? calendarEvent.end.toISOString() : null;
+
+    // Формируем объект события для обновления
     var event = {
       extendedProps: {
         event_id: eventId
       },
-      start: updatedStartTime // Используем время в ISO-формате
+      start: updatedStartTime, // Обновляем только start_time
+      end: existingEndTime // Если end_time существует, сохраняем его
     };
 
     // Отправляем запрос на обновление события
@@ -359,6 +363,5 @@ $(function () {
     // Закрываем модальное окно
     $('#modal-warning').modal('hide');
   });
-
 
 });
