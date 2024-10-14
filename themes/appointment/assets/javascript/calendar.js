@@ -44,12 +44,16 @@ $(function () {
   });
 
   // Инициализация календаря
-  var calendar = new Calendar(calendarEl, {
+  var calendar = new FullCalendar.Calendar(calendarEl, {
     locale: "ru",
     themeSystem: 'bootstrap',
+    timeZone: 'local', // Установка локальной временной зоны
     editable: true,
     droppable: true,
     eventDisplay: 'block',
+    nextDayThreshold: '23:59', 
+
+    // Загрузка событий с сервера
     events: function (fetchInfo, successCallback, failureCallback) {
       $.request('eventManagement::onLoadEvents', {
         success: function (data) {
@@ -57,7 +61,16 @@ $(function () {
             failureCallback();
             toastr.error('Не удалось загрузить события');
           } else {
-            successCallback(data.events);
+            var events = data.events.map(function (event) {
+              // Время уже будет конвертироваться в локальную зону благодаря timeZone: 'local'
+              console.log('Загруженное событие:');
+              console.log('ID события:', event.id);
+              console.log('Start time (UTC -> Asia/Bishkek):', event.start);
+              console.log('End time (UTC -> Asia/Bishkek):', event.end);
+
+              return event;  // Отправляем события без преобразования, так как FullCalendar работает в локальной зоне
+            });
+            successCallback(events);
           }
         },
         error: function () {
@@ -66,19 +79,43 @@ $(function () {
         }
       });
     },
-    eventAdd: function (info) {
-      // Проверяем, есть ли у события ID
-      if (info.event.extendedProps && info.event.extendedProps.event_id && info.el) {
-        var element = info.el;
-        element.setAttribute('data-event-id', info.event.extendedProps.event_id);
-        console.log('ID события присвоен:', info.event.extendedProps.event_id);
-      } else {
-        console.error('Элемент или ID события отсутствуют, присвоение невозможно.');
-      }
+
+    // Обработка перетаскивания события
+    eventDrop: function (info) {
+      // Преобразуем новое время в UTC для отправки на сервер
+      var newStartTime = moment(info.event.start).utc().toISOString();
+      var newEndTime = info.event.end ? moment(info.event.end).utc().toISOString() : null;
+
+      // Логируем перед отправкой на сервер
+      console.log("Отправляемые данные при перетаскивании:");
+      console.log("Start time (UTC):", newStartTime);
+      console.log("End time (UTC):", newEndTime);
+
+      // Отправляем данные на сервер
+      var eventData = {
+        event_id: info.event.extendedProps.event_id,
+        start_time: newStartTime,
+        end_time: newEndTime
+      };
+
+      $.request('eventManagement::onUpdateEvent', {
+        data: eventData,
+        success: function (response) {
+          if (!response.error) {
+            toastr.success('Событие успешно обновлено.');
+          } else {
+            toastr.error('Ошибка при обновлении события.');
+          }
+        },
+        error: function () {
+          toastr.error('Произошла ошибка при обновлении события.');
+        }
+      });
     },
 
-    drop: function (info) {
-      var eventId = info.draggedEl.getAttribute('data-event-id');
+    // Обработка изменения размера события
+    eventResize: function (info) {
+      var eventId = info.event.extendedProps ? info.event.extendedProps.event_id : null;
       if (!eventId) {
         toastr.error('ID события отсутствует, обновление невозможно.');
         return;
@@ -86,47 +123,102 @@ $(function () {
 
       var eventData = {
         event_id: eventId,
-        start_time: info.dateStr
+        start_time: info.event.start.toISOString(),
+        end_time: null // Устанавливаем null для однодневных событий
       };
 
+      // Если событие занимает больше одного дня
+      if (info.event.end && info.event.start.getDate() !== info.event.end.getDate()) {
+        // Проверяем, не заканчивается ли событие ровно в полночь следующего дня
+        if (moment(info.event.end).hour() === 0 && moment(info.event.end).minute() === 0 && moment(info.event.end).second() === 0) {
+          // Если событие заканчивается ровно в полночь, уменьшаем дату на один день
+          eventData.end_time = moment(info.event.end).subtract(1, 'seconds').toISOString(); // Устанавливаем конец предыдущего дня (23:59:59)
+        } else {
+          eventData.end_time = info.event.end.toISOString(); // Время окончания события
+        }
+      }
+
+      console.log("Start time:", info.event.start.toISOString());
+      console.log("End time:", eventData.end_time); // Для отладки
+
+      // Отправляем запрос на сервер для обновления события
       $.request('eventManagement::onUpdateEvent', {
         data: eventData,
         success: function (response) {
           if (!response.error) {
-            toastr.success(response.message || 'Событие успешно обновлено.');
+            toastr.success('Событие успешно обновлено.');
           } else {
-            toastr.error(response.message || 'Ошибка при обновлении события.');
+            toastr.error('Ошибка при обновлении события.');
           }
+        },
+        error: function () {
+          toastr.error('Произошла ошибка при обновлении события.');
         }
       });
-
-      if ($('#drop-remove').is(':checked')) {
-        info.draggedEl.parentNode.removeChild(info.draggedEl);
-      }
     },
+
+    // Клик по событию для открытия модального окна
     eventClick: function (info) {
       openDeleteModal(info.event.id);
 
-      // Получаем время начала события
       var startTime = info.event.start;
       if (startTime) {
-        // Форматируем время в 'yyyy-MM-ddTHH:mm' для input[type="datetime-local"]
-        var formattedDate = startTime.toISOString().slice(0, 16);
-        $('#event-time').val(formattedDate); // Устанавливаем значение в поле input
+        // Преобразуем время события из UTC в Asia/Bishkek
+        var localTime = moment.utc(startTime).tz("Asia/Bishkek"); // Преобразуем из UTC
+
+        // Форматируем время для input[type="datetime-local"]
+        var formattedDate = localTime.format('YYYY-MM-DDTHH:mm');
+
+        // Устанавливаем значение в поле input с id "event-time"
+        $('#event-time').val(formattedDate);
       }
-      
-    },
-    eventDrop: function (info) {
-      updateEvent(info.event);
-    },
-    eventResize: function (info) {
-      updateEvent(info.event);
     }
+
   });
+
+  
+  // Функция для обновления события
+  function updateEvent(event) {
+    var eventId = event.extendedProps ? event.extendedProps.event_id : null;
+    if (!eventId) {
+      toastr.error('ID события отсутствует, обновление невозможно.');
+      return;
+    }
+
+    // Преобразуем новое время начала и окончания события в UTC
+    var newStartTime = moment(event.start).utc().toISOString();
+    var newEndTime = event.end ? moment(event.end).utc().toISOString() : null;
+
+    // Формируем данные для отправки на сервер
+    var eventData = {
+      event_id: eventId,         // ID события
+      start_time: newStartTime,  // Новое время начала в UTC
+      end_time: newEndTime,      // Новое время окончания в UTC (если есть)
+      title: event.title,        // Название события
+      color: event.backgroundColor // Цвет события
+    };
+
+    // Отправляем запрос на сервер для обновления события
+    $.request('eventManagement::onUpdateEvent', {
+      data: eventData,
+      success: function (response) {
+        if (!response.error) {
+          toastr.success('Событие успешно обновлено.');
+        } else {
+          toastr.error('Ошибка при обновлении события.');
+        }
+      },
+      error: function () {
+        toastr.error('Произошла ошибка при обновлении события.');
+      }
+    });
+  }
+
+
 
   calendar.render();
 
-  // Добавляем событие в календарь
+  // Добавляем событие в календарь (создание нового события)
   $('#add-new-event').click(function (e) {
     e.preventDefault();
 
@@ -136,12 +228,16 @@ $(function () {
       return;
     }
 
+    // Преобразуем текущее время в UTC
+    var startTime = moment().toISOString();
+
     var eventData = {
       title: val,
-      start_time: new Date().toISOString(),
+      start_time: startTime,  // Время в UTC
       color: currColor
     };
 
+    // Отправляем данные на сервер
     $.request('eventManagement::onCreateEvent', {
       data: eventData,
       success: function (response) {
@@ -175,6 +271,8 @@ $(function () {
       }
     });
   });
+
+
 
   /* Выбор цвета */
   $('#color-chooser > li > a').click(function (e) {
@@ -223,39 +321,11 @@ $(function () {
     deleteEvent();
   });
 
-  // Функция для обновления события
-  function updateEvent(event) {
-    var eventId = event.extendedProps ? event.extendedProps.event_id : null;
-    if (!eventId) {
-      console.error('ID события отсутствует, обновление невозможно.');
-      toastr.error('ID события отсутствует, обновление невозможно.');
-      return;
-    }
 
-    $.request('eventManagement::onUpdateEvent', {
-      data: {
-        event_id: eventId,
-        title: event.title,
-        start_time: event.start ? event.start.toISOString() : null,
-        end_time: event.end ? event.end.toISOString() : null,
-        color: event.backgroundColor
-      },
-      success: function (response) {
-        if (!response.error) {
-          toastr.success(response.message || 'Событие успешно обновлено.');
-        } else {
-          toastr.error(response.message || 'Ошибка при обновлении события.');
-        }
-      },
-      error: function () {
-        toastr.error('Произошла ошибка при обновлении события.');
-      }
-    });
-  }
 
   // Обработка кнопки "Сохранить"
   $('#save-event').click(function () {
-    var eventTime = $('#event-time').val(); // Получаем новое время
+    var eventTime = $('#event-time').val(); // Получаем новое время из поля
 
     if (!eventIdToDelete) {
       toastr.error('ID события отсутствует, обновление невозможно.');
@@ -272,15 +342,23 @@ $(function () {
 
     var eventId = calendarEvent.extendedProps.event_id;
 
+    // Преобразуем время в объект Date и далее в ISO-формат
+    var updatedStartTime = new Date(eventTime).toISOString();
+
+    // Обновляем данные события с новым временем
     var event = {
       extendedProps: {
         event_id: eventId
       },
-      start: { toISOString: () => eventTime } // Используем новое время для обновления
+      start: updatedStartTime // Используем время в ISO-формате
     };
 
-    updateEvent(event); // Обновляем start_time
+    // Отправляем запрос на обновление события
+    updateEvent(event); // Обновляем start_time на сервере
+
+    // Закрываем модальное окно
+    $('#modal-warning').modal('hide');
   });
 
-    
+
 });
