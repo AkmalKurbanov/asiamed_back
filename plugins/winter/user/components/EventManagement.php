@@ -110,17 +110,17 @@ class EventManagement extends ComponentBase
             throw new ApplicationException('Событие не найдено.');
         }
 
-        // Обновляем только start_time
+        // Обновляем только start_time и end_time
         $event->start_time = Carbon::parse($data['start_time'])->format('Y-m-d H:i:s');
-
-        // Если end_time передается и не пустое, обновляем его, иначе оставляем старое значение
         if (!empty($data['end_time'])) {
             $event->end_time = Carbon::parse($data['end_time'])->format('Y-m-d H:i:s');
+        } else {
+            $event->end_time = null;  // Если end_time пустое, очищаем его
         }
 
-        // Логируем данные после обновления
-        \Log::info('Обновленное время (start_time): ' . $event->start_time);
-        \Log::info('Обновленное время (end_time): ' . ($event->end_time ?? 'null'));
+        // Логирование для проверки
+        \Log::info('Сохраненное время (start_time): ' . $event->start_time);
+        \Log::info('Сохраненное время (end_time): ' . ($event->end_time ?? 'null'));
 
         $event->save();
 
@@ -132,6 +132,7 @@ class EventManagement extends ComponentBase
         return ['error' => true, 'message' => 'Произошла ошибка при обновлении события.'];
     }
 }
+
 
 
     public function onDeleteEvent()
