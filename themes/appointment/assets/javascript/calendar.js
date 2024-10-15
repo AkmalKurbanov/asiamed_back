@@ -1,8 +1,6 @@
 $(function () {
   var currColor = '#3c8dbc';
 
-  var Calendar = FullCalendar.Calendar;
-
   var calendarEl = document.getElementById('calendar');
 
   // Инициализация календаря
@@ -14,6 +12,7 @@ $(function () {
     droppable: false,  // Убираем возможность перетаскивания внешних событий
     eventDisplay: 'block',
     nextDayThreshold: '23:59',
+
 
     // Настройка формата отображения времени для событий
     eventTimeFormat: {
@@ -154,13 +153,15 @@ $(function () {
       return;
     }
 
-    var newStartTime = moment(event.start).utc().toISOString();
-    var newEndTime = event.end ? moment(event.end).utc().toISOString() : null;
+    var isAllDay = event.allDay;  // Проверяем, является ли событие событием на весь день
+    var newStartTime = isAllDay ? moment(event.start).format('YYYY-MM-DD') : moment(event.start).utc().toISOString();
+    var newEndTime = event.end ? (isAllDay ? moment(event.end).format('YYYY-MM-DD') : moment(event.end).utc().toISOString()) : null;
 
     var eventData = {
       event_id: eventId,
       start_time: newStartTime,
       end_time: newEndTime,
+      allDay: isAllDay,
       title: event.title,
       color: event.backgroundColor
     };
@@ -170,14 +171,6 @@ $(function () {
       success: function (response) {
         if (!response.error) {
           toastr.success('Событие успешно обновлено.');
-
-          // Удаляем старое событие из календаря
-          var calendarEvent = calendar.getEventById(eventId);
-          if (calendarEvent) {
-            calendarEvent.remove();
-          }
-
-          // Перезагружаем календарь
           calendar.refetchEvents();
         } else {
           toastr.error('Ошибка при обновлении события.');
@@ -188,6 +181,7 @@ $(function () {
       }
     });
   }
+
 
   calendar.render();
 
@@ -201,12 +195,14 @@ $(function () {
       return;
     }
 
-    var startTime = moment().toISOString();
+    var isAllDay = $('#all-day-checkbox').is(':checked');  // Проверяем, выбрано ли событие на весь день
+    var startTime = isAllDay ? moment().format('YYYY-MM-DD') : moment().toISOString();  // Форматируем дату в зависимости от типа события
 
     var eventData = {
       title: val,
       start_time: startTime,
-      color: currColor
+      color: currColor,
+      allDay: isAllDay  // Передаем выбор allDay
     };
 
     // Отправляем данные на сервер для создания события
@@ -216,27 +212,26 @@ $(function () {
         if (!response.error && response.event_id) {
           toastr.success('Событие успешно создано.');
 
-          // Создаем событие в календаре
+          // Добавляем событие в календарь
           var event = {
-            id: response.event_id,  // Используем ID, который вернулся с сервера
+            id: response.event_id,
             title: val,
             start: startTime,
             backgroundColor: currColor,
             borderColor: currColor,
-            allDay: true,
-            editable: true, // Помечаем событие как редактируемое
-            durationEditable: true, // Разрешаем изменение продолжительности
+            allDay: isAllDay,  // Передаем выбор allDay
+            editable: true,
+            durationEditable: true,
             extendedProps: {
-              event_id: response.event_id // Присваиваем event_id в extendedProps
+              event_id: response.event_id
             }
           };
 
-          // Добавляем событие в календарь
           calendar.addEvent(event);
-          console.log("Созданное событие имеет event_id: ", response.event_id);
 
-          // Очищаем поле ввода после создания
+          // Очищаем поле ввода и чекбокс после создания
           $('#new-event').val('');
+          $('#all-day-checkbox').prop('checked', false);
         } else {
           toastr.error('Ошибка при создании события.');
         }
@@ -246,6 +241,7 @@ $(function () {
       }
     });
   });
+
 
   /* Выбор цвета */
   $('#color-chooser > li > a').click(function (e) {
@@ -261,37 +257,37 @@ $(function () {
   var eventIdToDelete = null;
 
   function openDeleteModal(eventId) {
-    console.log("Открытие модального окна для удаления, ID события:", eventId);
-    eventIdToDelete = eventId; // Присваиваем ID события для удаления
+    eventIdToDelete = eventId;
     $('#modal-warning').modal('show');
   }
 
   function deleteEvent() {
     if (!eventIdToDelete) {
-      toastr.error('ID события отсутствует, удаление невозможно.');
       return;
     }
 
-    // Удаление события из базы данных
     $.request('eventManagement::onDeleteEvent', {
       data: { event_id: eventIdToDelete },
       success: function (response) {
         if (!response.error) {
-          console.log("Попытка удалить событие с ID:", eventIdToDelete);
+          // Получаем список всех событий в календаре
+          var allEvents = calendar.getEvents();
 
-          // Находим и удаляем событие из календаря
-          var calendarEvent = calendar.getEventById(eventIdToDelete);
+          // Ищем событие по ID и удаляем его
+          var calendarEvent = allEvents.find(function (event) {
+            return event.extendedProps && event.extendedProps.event_id == eventIdToDelete;
+          });
+
           if (calendarEvent) {
-            calendarEvent.remove(); // Удаляем событие из календаря
-            console.log("Событие удалено из календаря:", eventIdToDelete);
-          } else {
-            console.log("Событие с таким ID не найдено в календаре.");
+            calendarEvent.remove();  // Удаляем событие из календаря
           }
 
           toastr.success(response.message || 'Событие успешно удалено.');
+          calendar.refetchEvents();
         } else {
           toastr.error(response.message || 'Ошибка при удалении события.');
         }
+
         $('#modal-warning').modal('hide');
       },
       error: function () {
@@ -300,7 +296,7 @@ $(function () {
       }
     });
 
-    eventIdToDelete = null; // Очищаем переменную после удаления
+    eventIdToDelete = null;
   }
 
   $('#delete-event').last().click(function () {
@@ -341,5 +337,4 @@ $(function () {
     // Закрываем модальное окно
     $('#modal-warning').modal('hide');
   });
-
 });
