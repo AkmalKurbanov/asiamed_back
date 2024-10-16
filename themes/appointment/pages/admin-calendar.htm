@@ -55,10 +55,10 @@ is_hidden = 0
                   </div>
 
                   <div class="input-group">
-                    
+                    <input type="hidden" name="all_day" value="0">
                     <div class="icheck-primary">
-                      <input type="checkbox" id="all-day-checkbox">
-                      <label for="all-day-checkbox"> Событие на весь день</label>
+                      <input type="checkbox" id="all_day" name="all_day" value="1">
+                      <label for="all_day"> Событие на весь день</label>
                     </div>
                   </div>
                   
@@ -103,6 +103,14 @@ is_hidden = 0
         <div class="form-group">
           <label for="event-time">Время события:</label>
           <input type="datetime-local" class="form-control" id="event-time" placeholder="Выберите время">
+        </div>
+        <div class="form-group">
+          <label for="event-title">Название события:</label>
+          <input type="text" class="form-control" id="event-title" placeholder="Введите название">
+        </div>
+        <div class="form-group">
+          <label for="event-description">Описание события:</label>
+          <textarea class="form-control" id="event-description" rows="3" placeholder="Введите описание"></textarea>
         </div>
       </div>
       <div class="modal-footer justify-content-between">

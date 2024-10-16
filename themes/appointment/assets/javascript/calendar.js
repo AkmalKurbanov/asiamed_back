@@ -1,191 +1,171 @@
+
 $(function () {
-  var currColor = '#3c8dbc';
+  var currColor = '#3c8dbc'; // Начальный цвет для событий
+  var calendar; // Переменная для календаря
 
-  var calendarEl = document.getElementById('calendar');
+  function initCalendar() {
+    var calendarEl = document.getElementById('calendar');
 
-  // Инициализация календаря
-  var calendar = new FullCalendar.Calendar(calendarEl, {
-    locale: "ru",
-    themeSystem: 'bootstrap',
-    timeZone: 'local', // Установка локальной временной зоны
-    editable: true,    // Включаем редактирование событий (перетаскивание и изменение размера)
-    droppable: false,  // Убираем возможность перетаскивания внешних событий
-    eventDisplay: 'block',
-    nextDayThreshold: '23:59',
-
-
-    // Настройка формата отображения времени для событий
-    eventTimeFormat: {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false // Используем 24-часовой формат
-    },
-
-    // Загрузка событий с сервера
-    events: function (fetchInfo, successCallback, failureCallback) {
-      $.request('eventManagement::onLoadEvents', {
-        success: function (data) {
-          if (data.error) {
-            failureCallback();
-            toastr.error('Не удалось загрузить события');
-          } else {
-            var events = data.events.map(function (event) {
-              return event;
-            });
-            successCallback(events);
-          }
-        },
-        error: function () {
-          failureCallback();
-          toastr.error('Произошла ошибка при загрузке событий');
-        }
-      });
-    },
-
-    // Обработка перетаскивания события внутри календаря
-    eventDrop: function (info) {
-      var eventId = info.event.extendedProps ? info.event.extendedProps.event_id : info.event.id;
-
-      if (!eventId) {
-        toastr.error('ID события отсутствует, обновление невозможно.');
-        console.log('Ошибка: ID события отсутствует');
-        return;
-      }
-
-      // Преобразуем новое время начала и окончания в UTC
-      var newStartTime = moment(info.event.start).utc().toISOString();
-      var newEndTime = info.event.end ? moment(info.event.end).utc().toISOString() : null;
-
-      // Логирование для отладки
-      console.log("Перетаскиваемое событие, ID:", eventId);
-      console.log("Новое время начала (UTC):", newStartTime);
-      console.log("Новое время окончания (UTC):", newEndTime);
-
-      // Отправляем запрос на сервер для обновления события
-      var eventData = {
-        event_id: eventId,  // ID события для обновления
-        start_time: newStartTime,
-        end_time: newEndTime
-      };
-
-      $.request('eventManagement::onUpdateEvent', {
-        data: eventData,
-        success: function (response) {
-          if (!response.error) {
-            toastr.success('Событие успешно обновлено.');
-            console.log('Событие обновлено успешно:', response);
-          } else {
-            toastr.error('Ошибка при обновлении события.');
-            console.log('Ошибка на сервере при обновлении события:', response);
-          }
-        },
-        error: function (error) {
-          toastr.error('Произошла ошибка при обновлении события.');
-          console.log('Ошибка запроса при обновлении события:', error);
-        }
-      });
-    },
-
-    // Обработка изменения размера события
-    eventResize: function (info) {
-      var eventId = info.event.extendedProps ? info.event.extendedProps.event_id : null;
-      if (!eventId) {
-        toastr.error('ID события отсутствует, обновление невозможно.');
-        return;
-      }
-
-      var eventData = {
-        event_id: eventId,
-        start_time: info.event.start.toISOString(),
-        end_time: null // Устанавливаем null для однодневных событий
-      };
-
-      // Если событие занимает больше одного дня
-      if (info.event.end && info.event.start.getDate() !== info.event.end.getDate()) {
-        if (moment(info.event.end).hour() === 0 && moment(info.event.end).minute() === 0 && moment(info.event.end).second() === 0) {
-          // Если событие заканчивается ровно в полночь, уменьшаем дату на один день
-          eventData.end_time = moment(info.event.end).subtract(1, 'seconds').toISOString(); // Устанавливаем конец предыдущего дня (23:59:59)
-        } else {
-          eventData.end_time = info.event.end.toISOString();
-        }
-      }
-
-      console.log("Start time:", info.event.start.toISOString());
-      console.log("End time:", eventData.end_time); // Для отладки
-
-      // Отправляем запрос на сервер для обновления события
-      $.request('eventManagement::onUpdateEvent', {
-        data: eventData,
-        success: function (response) {
-          if (!response.error) {
-            toastr.success('Событие успешно обновлено.');
-          } else {
-            toastr.error('Ошибка при обновлении события.');
-          }
-        },
-        error: function () {
-          toastr.error('Произошла ошибка при обновлении события.');
-        }
-      });
-    },
-
-    // Клик по событию для открытия модального окна
-    eventClick: function (info) {
-      openDeleteModal(info.event.id);
-
-      var startTime = info.event.start;
-      if (startTime) {
-        var localTime = moment.utc(startTime).tz("Asia/Bishkek");
-
-        // Форматируем время для input[type="datetime-local"]
-        var formattedDate = localTime.format('YYYY-MM-DDTHH:mm');
-        $('#event-time').val(formattedDate);
-      }
-    }
-
-  });
-
-  // Функция для обновления события
-  function updateEvent(event) {
-    var eventId = event.extendedProps ? event.extendedProps.event_id : null;
-    if (!eventId) {
-      toastr.error('ID события отсутствует, обновление невозможно.');
-      return;
-    }
-
-    var isAllDay = event.allDay;  // Проверяем, является ли событие событием на весь день
-    var newStartTime = isAllDay ? moment(event.start).format('YYYY-MM-DD') : moment(event.start).utc().toISOString();
-    var newEndTime = event.end ? (isAllDay ? moment(event.end).format('YYYY-MM-DD') : moment(event.end).utc().toISOString()) : null;
-
-    var eventData = {
-      event_id: eventId,
-      start_time: newStartTime,
-      end_time: newEndTime,
-      allDay: isAllDay,
-      title: event.title,
-      color: event.backgroundColor
-    };
-
-    $.request('eventManagement::onUpdateEvent', {
-      data: eventData,
-      success: function (response) {
-        if (!response.error) {
-          toastr.success('Событие успешно обновлено.');
-          calendar.refetchEvents();
-        } else {
-          toastr.error('Ошибка при обновлении события.');
-        }
+    // Инициализация календаря
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      locale: "ru",
+      themeSystem: 'bootstrap',
+      eventDisplay: 'block',
+      nextDayThreshold: '23:59',
+      editable: true,
+      // Настройка формата отображения времени для событий
+      eventTimeFormat: {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false // Используем 24-часовой формат
       },
-      error: function () {
-        toastr.error('Произошла ошибка при обновлении события.');
+
+      // Загрузка событий с сервера
+      events: function (fetchInfo, successCallback, failureCallback) {
+        $.request('eventManagement::onLoadEvents', {
+          success: function (data) {
+            console.log('Данные, полученные с сервера:', data);
+
+            if (data.error) {
+              failureCallback();
+              toastr.error('Не удалось загрузить события');
+            } else {
+              var events = data.events.map(function (event) {
+                console.log('Обработанное событие:', event);
+
+                var eventData = {
+                  id: event.id,
+                  title: event.title,
+                  start: event.start, // Используем start
+                  end: event.end,     // Используем end
+                  backgroundColor: event.backgroundColor || currColor,
+                  borderColor: event.borderColor || currColor,
+                  editable: event.editable !== undefined ? event.editable : true,
+                  extendedProps: {
+                    event_id: event.id
+                  }
+                };
+
+                // Преобразуем allDay в булевое значение
+                eventData.allDay = event.allDay === true || event.allDay === "1" || event.allDay === 1;
+
+                return eventData;
+              });
+
+
+              successCallback(events);
+            }
+          },
+          error: function () {
+            failureCallback();
+            toastr.error('Произошла ошибка при загрузке событий');
+          }
+        });
+      },
+
+      // Обработка перетаскивания события внутри календаря
+      eventDrop: function (info) {
+        var eventId = info.event.extendedProps ? info.event.extendedProps.event_id : info.event.id;
+
+        if (!eventId) {
+          toastr.error('ID события отсутствует, обновление невозможно.');
+          return;
+        }
+
+        // Преобразуем новое время начала и окончания в UTC
+        var newStartTime = moment(info.event.start).utc().toISOString();
+        var newEndTime = info.event.end ? moment(info.event.end).utc().toISOString() : null;
+
+        // Отправляем запрос на сервер для обновления события
+        var eventData = {
+          event_id: eventId,  // ID события для обновления
+          start_time: newStartTime,
+          end_time: newEndTime
+        };
+
+        $.request('eventManagement::onUpdateEvent', {
+          data: eventData,
+          success: function (response) {
+            if (!response.error) {
+              toastr.success('Событие успешно обновлено.');
+            } else {
+              toastr.error('Ошибка при обновлении события.');
+            }
+          },
+          error: function (error) {
+            toastr.error('Произошла ошибка при обновлении события.');
+          }
+        });
+      },
+
+      // Обработка изменения размера события
+      eventResize: function (info) {
+        var eventId = info.event.extendedProps ? info.event.extendedProps.event_id : null;
+        if (!eventId) {
+          toastr.error('ID события отсутствует, обновление невозможно.');
+          return;
+        }
+
+        var eventData = {
+          event_id: eventId,
+          start_time: info.event.start.toISOString(),
+          end_time: info.event.end ? info.event.end.toISOString() : info.event.start.toISOString() // Используем start в случае, если end не установлен
+        };
+
+        // Отправляем запрос на сервер для обновления события
+        $.request('eventManagement::onUpdateEvent', {
+          data: eventData,
+          success: function (response) {
+            if (!response.error) {
+              toastr.success('Событие успешно обновлено.');
+            } else {
+              toastr.error('Ошибка при обновлении события.');
+            }
+          },
+          error: function () {
+            toastr.error('Произошла ошибка при обновлении события.');
+          }
+        });
+      },
+
+      // Клик по событию для открытия модального окна
+      eventClick: function (info) {
+        openDeleteModal(info.event.id);
+
+        // Заполняем поля title и description
+        $('#event-title').val(info.event.title); // Заполняем поле для названия события
+        $('#event-description').val(info.event.extendedProps.description || '');
+
+        var startTime = info.event.start;
+
+        // Проверяем, является ли событие на весь день
+        if (info.event.allDay) {
+          // Скрываем поле выбора времени для событий на весь день
+          $('#event-time').closest('.form-group').hide();
+        } else {
+          // Показываем поле выбора времени для обычных событий
+          $('#event-time').closest('.form-group').show();
+
+          if (startTime) {
+            var localTime = moment.utc(startTime).tz("Asia/Bishkek");
+
+            // Форматируем время для input[type="datetime-local"]
+            var formattedDate = localTime.format('YYYY-MM-DDTHH:mm');
+            $('#event-time').val(formattedDate);
+          }
+        }
       }
+
     });
+
+    // Рендерим календарь
+    calendar.render();
   }
 
+  // Инициализируем календарь
+  initCalendar();
 
-  calendar.render();
-
-  // Добавляем событие в календарь (создание нового события)
+  // Функция для создания нового события
   $('#add-new-event').click(function (e) {
     e.preventDefault();
 
@@ -195,14 +175,14 @@ $(function () {
       return;
     }
 
-    var isAllDay = $('#all-day-checkbox').is(':checked');  // Проверяем, выбрано ли событие на весь день
-    var startTime = isAllDay ? moment().format('YYYY-MM-DD') : moment().toISOString();  // Форматируем дату в зависимости от типа события
+    var startTime = moment().toISOString(); // Текущее время
+    var isAllDay = $('#all_day').is(':checked') ? 1 : 0;
 
     var eventData = {
       title: val,
       start_time: startTime,
       color: currColor,
-      allDay: isAllDay  // Передаем выбор allDay
+      all_day: isAllDay // Передаем значение чекбокса
     };
 
     // Отправляем данные на сервер для создания события
@@ -211,27 +191,9 @@ $(function () {
       success: function (response) {
         if (!response.error && response.event_id) {
           toastr.success('Событие успешно создано.');
-
-          // Добавляем событие в календарь
-          var event = {
-            id: response.event_id,
-            title: val,
-            start: startTime,
-            backgroundColor: currColor,
-            borderColor: currColor,
-            allDay: isAllDay,  // Передаем выбор allDay
-            editable: true,
-            durationEditable: true,
-            extendedProps: {
-              event_id: response.event_id
-            }
-          };
-
-          calendar.addEvent(event);
-
-          // Очищаем поле ввода и чекбокс после создания
+          calendar.refetchEvents(); // Перезагрузка событий в календаре
           $('#new-event').val('');
-          $('#all-day-checkbox').prop('checked', false);
+          $('#all_day').prop('checked', false); // Сбрасываем чекбокс
         } else {
           toastr.error('Ошибка при создании события.');
         }
@@ -239,17 +201,6 @@ $(function () {
       error: function () {
         toastr.error('Произошла ошибка при создании события.');
       }
-    });
-  });
-
-
-  /* Выбор цвета */
-  $('#color-chooser > li > a').click(function (e) {
-    e.preventDefault();
-    currColor = $(this).css('color');
-    $('#add-new-event').css({
-      'background-color': currColor,
-      'border-color': currColor
     });
   });
 
@@ -270,22 +221,18 @@ $(function () {
       data: { event_id: eventIdToDelete },
       success: function (response) {
         if (!response.error) {
-          // Получаем список всех событий в календаре
-          var allEvents = calendar.getEvents();
-
-          // Ищем событие по ID и удаляем его
-          var calendarEvent = allEvents.find(function (event) {
-            return event.extendedProps && event.extendedProps.event_id == eventIdToDelete;
-          });
-
+          // Удаляем событие из календаря
+          var calendarEvent = calendar.getEventById(eventIdToDelete);
           if (calendarEvent) {
-            calendarEvent.remove();  // Удаляем событие из календаря
+            calendarEvent.remove();
           }
 
-          toastr.success(response.message || 'Событие успешно удалено.');
+          // Обновляем календарь, перезагружая события
           calendar.refetchEvents();
+
+          toastr.success(response.message || 'Событие успешно удалено.');
         } else {
-          toastr.error(response.message || 'Ошибка при удалении события.');
+          toastr.error('Ошибка при удалении события.');
         }
 
         $('#modal-warning').modal('hide');
@@ -303,8 +250,11 @@ $(function () {
     deleteEvent();
   });
 
+  // Функция для обновления события при нажатии на #save-event
   $('#save-event').click(function () {
     var eventTime = $('#event-time').val();
+    var eventTitle = $('#event-title').val(); // Получаем значение нового заголовка
+    var eventDescription = $('#event-description').val(); // Получаем значение нового описания
 
     if (!eventIdToDelete) {
       toastr.error('ID события отсутствует, обновление невозможно.');
@@ -320,21 +270,86 @@ $(function () {
 
     var eventId = calendarEvent.extendedProps.event_id;
     var updatedStartTime = new Date(eventTime).toISOString();
-
     var existingEndTime = calendarEvent.end ? calendarEvent.end.toISOString() : null;
 
-    var event = {
-      extendedProps: {
-        event_id: eventId
-      },
-      start: updatedStartTime,
-      end: existingEndTime
+    // Обновляем данные события в календаре
+    calendarEvent.setStart(updatedStartTime);
+    calendarEvent.setProp('title', eventTitle);  // Обновляем заголовок
+    calendarEvent.setExtendedProp('description', eventDescription);  // Обновляем описание
+
+    if (existingEndTime) {
+      calendarEvent.setEnd(existingEndTime);
+    }
+
+    // Отправляем данные на сервер для обновления
+    var eventData = {
+      event_id: eventId,
+      start_time: updatedStartTime,
+      end_time: existingEndTime,
+      title: eventTitle, // Передаем новый заголовок
+      description: eventDescription // Передаем новое описание
     };
 
-    // Обновляем событие
-    updateEvent(event);
+    $.request('eventManagement::onUpdateEvent', {
+      data: eventData,
+      success: function (response) {
+        if (!response.error) {
+          toastr.success('Событие успешно обновлено.');
+        } else {
+          toastr.error('Ошибка при обновлении события.');
+        }
+      },
+      error: function () {
+        toastr.error('Произошла ошибка при обновлении события.');
+      }
+    });
 
     // Закрываем модальное окно
     $('#modal-warning').modal('hide');
   });
+
+  // Функция для обновления события
+  function updateEvent(event) {
+    var eventId = event.extendedProps ? event.extendedProps.event_id : null;
+    if (!eventId) {
+      toastr.error('ID события отсутствует, обновление невозможно.');
+      return;
+    }
+
+    var newStartTime = moment(event.start).utc().toISOString();
+    var newEndTime = event.end ? moment(event.end).utc().toISOString() : null;
+
+    var eventData = {
+      event_id: eventId,
+      start_time: newStartTime,
+      end_time: newEndTime,
+      title: event.title,
+      color: event.backgroundColor
+    };
+
+    $.request('eventManagement::onUpdateEvent', {
+      data: eventData,
+      success: function (response) {
+        if (!response.error) {
+          toastr.success('Событие успешно обновлено.');
+        } else {
+          toastr.error('Ошибка при обновлении события.');
+        }
+      },
+      error: function () {
+        toastr.error('Произошла ошибка при обновлении события.');
+      }
+    });
+  }
+
+  // Выбор цвета для события
+  $('#color-chooser > li > a').click(function (e) {
+    e.preventDefault();
+    currColor = $(this).css('color');
+    $('#add-new-event').css({
+      'background-color': currColor,
+      'border-color': currColor
+    });
+  });
 });
+

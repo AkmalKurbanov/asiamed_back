@@ -255,3 +255,12 @@
 2.0.46:
     - 'Created table winter_user_draggable_events'
     - builder_table_create_winter_user_draggable_events.php
+2.0.47:
+    - 'Updated table winter_user_events'
+    - builder_table_update_winter_user_events_3.php
+2.0.48:
+    - 'Updated table winter_user_events'
+    - builder_table_update_winter_user_events_4.php
+2.0.49:
+    - 'Updated table winter_user_events'
+    - builder_table_update_winter_user_events_5.php

@@ -42,7 +42,8 @@ class EventManagement extends ComponentBase
             // Конвертируем время в UTC перед сохранением
             $event->start_time = Carbon::parse($data['start_time'], 'Asia/Bishkek')->setTimezone('UTC');
             $event->end_time = !empty($data['end_time']) ? Carbon::parse($data['end_time'], 'Asia/Bishkek')->setTimezone('UTC') : null;
-
+            $event->all_day = post('all_day', 0);
+            \Log::info(post());
             \Log::info('Время, сохранённое в UTC (start_time): ' . $event->start_time);
 
             $event->color = $data['color'] ?? '#3c8dbc';
@@ -65,7 +66,7 @@ class EventManagement extends ComponentBase
                 // Конвертируем время из UTC в локальную временную зону Asia/Bishkek
                 $startTime = Carbon::parse($event->start_time, 'UTC')->setTimezone('Asia/Bishkek')->toIso8601String();
                 $endTime = $event->end_time ? Carbon::parse($event->end_time, 'UTC')->setTimezone('Asia/Bishkek')->toIso8601String() : null;
-
+                
                 // Логируем для проверки
                 \Log::info('Загруженное событие: ID ' . $event->id);
                 \Log::info('Start time (UTC -> Asia/Bishkek): ' . $startTime);
@@ -76,6 +77,7 @@ class EventManagement extends ComponentBase
                     'title' => $event->title,
                     'start' => $startTime,  // Отправляем конвертированное время
                     'end' => $endTime,      // Отправляем конвертированное время окончания (если есть)
+                    'allDay' => $event->all_day,
                     'backgroundColor' => $event->color,
                     'borderColor' => $event->color,
                     'editable' => true,
@@ -110,7 +112,8 @@ class EventManagement extends ComponentBase
             throw new ApplicationException('Событие не найдено.');
         }
 
-        // Обновляем только start_time и end_time
+        $event->title = $data['title'] ?? $event->title;
+        $event->description = $data['description'] ?? $event->description;
         $event->start_time = Carbon::parse($data['start_time'])->format('Y-m-d H:i:s');
         if (!empty($data['end_time'])) {
             $event->end_time = Carbon::parse($data['end_time'])->format('Y-m-d H:i:s');
