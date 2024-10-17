@@ -8,6 +8,9 @@ use Auth;
 use ApplicationException;
 use Flash;
 use Carbon\Carbon;
+Carbon::setLocale('ru');
+
+use Illuminate\Support\Facades\DB;
 
 class DoctorManagement extends ComponentBase
 {
@@ -201,6 +204,88 @@ class DoctorManagement extends ComponentBase
 }
 
 
+protected function getNotificationText($type)
+{
+    $notificationTypes = [
+        'patient_attached' => 'Новый пациент',
+        'appointment_scheduled' => 'Запись на приём',
+        'message_received' => 'Новое сообщение',
+        // Добавьте другие типы уведомлений
+    ];
 
+    return $notificationTypes[$type] ?? 'Общее уведомление';
+}
+
+// Получение списка уведомлений
+public function onGetNotifications()
+{
+    $userId = Auth::getUser()->id;
+
+    // Получаем уведомления пользователя
+    $notifications = DB::table('winter_user_notifications')
+        ->where('user_id', $userId)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    // Если уведомлений нет, возвращаем пустой массив
+    if ($notifications->isEmpty()) {
+        return [
+            'notifications' => []
+        ];
+    }
+
+    // Форматируем уведомления
+    $formattedNotifications = $notifications->map(function($notification) {
+        return [
+        'id' => $notification->id,
+        'text' => $this->getNotificationText($notification->type), // Преобразуем тип в понятный текст
+        'category' => !empty($notification->category) ? $notification->category : 'Общие уведомления',
+        'time' => Carbon::parse($notification->created_at)->diffForHumans(),
+        'url' => url('/edit-patient/' . $notification->entity_id),
+    ];
+    });
+
+    return [
+        'notifications' => $formattedNotifications
+    ];
+}
+
+
+// Получение количества непрочитанных уведомлений
+public function onGetUnreadCount()
+{
+    $userId = Auth::getUser()->id;
+
+    $unreadCount = DB::table('winter_user_notifications')
+        ->where('user_id', $userId)
+        ->where('is_read', false)
+        ->count();
+
+    return [
+        'unreadCount' => $unreadCount
+    ];
+}
+
+public function onMarkNotificationAsRead()
+{
+    $notificationId = post('notification_id');
+    \Log::info('Notification ID: ' . $notificationId);
+
+    $userId = Auth::getUser()->id;
+    \Log::info('User ID: ' . $userId);
+
+    $affectedRows = DB::table('winter_user_notifications')
+        ->where('id', $notificationId)
+        ->where('user_id', $userId)
+        ->update(['is_read' => true, 'updated_at' => now()]);
+
+    \Log::info('Rows updated: ' . $affectedRows);
+
+    if ($affectedRows == 0) {
+        \Log::error('Ошибка: уведомление не обновлено');
+    }
+
+    return ['message' => 'Уведомление отмечено как прочитанное'];
+}
 
 }

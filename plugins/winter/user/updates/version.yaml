@@ -270,3 +270,9 @@
 2.0.51:
     - 'Updated table winter_user_notifications'
     - builder_table_update_winter_user_notifications.php
+2.0.52:
+    - 'Updated table winter_user_notifications'
+    - builder_table_update_winter_user_notifications_2.php
+2.0.53:
+    - 'Updated table winter_user_notifications'
+    - builder_table_update_winter_user_notifications_3.php

@@ -168,6 +168,12 @@ $(function () {
       //   required: true,
       //   phoneFormat: true,
       // },
+      appointment_date: {
+        required: true
+      },
+      appointment_time: {
+        required: true
+      },
       terms: {
         required: true,
       },
@@ -193,6 +199,12 @@ $(function () {
       //   required: "Пожалуйста, введите номер телефона",
       //   phoneFormat: "Пожалуйста, введите номер телефона в формате 0(999) 999-999",
       // },
+      appointment_date: {
+        required: "Пожалуйста, введите дату визита",
+      },
+      appointment_time: {
+        required: "Пожалуйста, введите время визита",
+      },
       terms: "Пожалуйста, примите наши условия",
     },
     errorElement: "span",
@@ -475,6 +487,14 @@ $("#visit_type").on("change", function () {
 
   if (selectedType === "амбулаторный") {
     $(".for-type-js").addClass("d-none"); // Скрываем элементы для амбулаторного визита
+    
+    // Сбрасываем селект с врачами на значение по умолчанию
+    $("#doctor_id").val("").trigger("change");
+
+    // Скрываем чекбокс и сбрасываем его
+    $("#make_primary").prop("checked", false);
+    $("#make_primary_container").addClass("d-none");
+  
   } else if (selectedType === "стационарный") {
     $(".for-type-js").removeClass("d-none"); // Показываем элементы для стационарного визита
   } else {

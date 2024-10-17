@@ -64,7 +64,8 @@ patient_id = "{{ :patient_id }}"
                   </li>
                   <li class="list-group-item">
                     <b>Ближайший прием:</b> <span class="float-right">{% for appointment in patient.appointments %}
-                    {{ appointment.appointment_date|date('d.m.Y') }}
+                    {{ appointment.appointment_date|date('d.m.Y') }} |
+                    {{ appointment.appointment_time }}
                   {% endfor %}</span>
                   </li>
 
