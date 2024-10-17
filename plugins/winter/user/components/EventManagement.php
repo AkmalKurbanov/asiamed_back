@@ -3,10 +3,10 @@ namespace Winter\User\Components;
 
 use Cms\Classes\ComponentBase;
 use Winter\User\Models\User;
+use Winter\User\Models\Event;
 use Auth;
 use ApplicationException;
 use Carbon\Carbon;
-use Winter\User\Models\Event;
 
 class EventManagement extends ComponentBase
 {
@@ -23,14 +23,14 @@ class EventManagement extends ComponentBase
         $this->page['events'] = $this->onLoadEvents()['events'];
     }
 
+    // Создание события (только для администраторов)
     public function onCreateEvent()
     {
+        $this->checkAdmin(); // Проверка прав администратора
+
         $data = post();
 
-        \Log::info('Полученные данные для создания события:', $data);
-
         if (empty($data['title']) || empty($data['start_time'])) {
-            \Log::error('Не заполнены обязательные поля: title или start_time');
             throw new ApplicationException('Необходимо заполнить название и время начала');
         }
 
@@ -38,49 +38,37 @@ class EventManagement extends ComponentBase
             $event = new Event();
             $event->title = $data['title'];
             $event->description = $data['description'] ?? '';
-
-            // Конвертируем время в UTC перед сохранением
-            $event->start_time = Carbon::parse($data['start_time'], 'Asia/Bishkek')->setTimezone('UTC');
-            $event->end_time = !empty($data['end_time']) ? Carbon::parse($data['end_time'], 'Asia/Bishkek')->setTimezone('UTC') : null;
+            $event->start_time = Carbon::parse($data['start_time'])->setTimezone('UTC');
+            $event->end_time = !empty($data['end_time']) ? Carbon::parse($data['end_time'])->setTimezone('UTC') : null;
             $event->all_day = post('all_day', 0);
-            \Log::info(post());
-            \Log::info('Время, сохранённое в UTC (start_time): ' . $event->start_time);
-
             $event->color = $data['color'] ?? '#3c8dbc';
             $event->created_by = Auth::getUser()->id;
             $event->save();
 
-            \Log::info('Событие успешно создано: ID ' . $event->id);
-
             return ['error' => false, 'message' => 'Событие успешно создано.', 'event_id' => $event->id];
         } catch (\Exception $e) {
-            \Log::error('Ошибка при создании события: ' . $e->getMessage());
-            return ['error' => true, 'message' => 'Произошла ошибка при создании события. Пожалуйста, повторите попытку.'];
+            return ['error' => true, 'message' => 'Произошла ошибка при создании события.'];
         }
     }
-    
+
+    // Загрузка событий
     public function onLoadEvents()
     {
         try {
             $events = Event::all()->map(function ($event) {
-                // Конвертируем время из UTC в локальную временную зону Asia/Bishkek
                 $startTime = Carbon::parse($event->start_time, 'UTC')->setTimezone('Asia/Bishkek')->toIso8601String();
                 $endTime = $event->end_time ? Carbon::parse($event->end_time, 'UTC')->setTimezone('Asia/Bishkek')->toIso8601String() : null;
-                
-                // Логируем для проверки
-                \Log::info('Загруженное событие: ID ' . $event->id);
-                \Log::info('Start time (UTC -> Asia/Bishkek): ' . $startTime);
-                \Log::info('End time (UTC -> Asia/Bishkek): ' . ($endTime ?? 'null'));
 
                 return [
                     'id' => $event->id,
                     'title' => $event->title,
-                    'start' => $startTime,  // Отправляем конвертированное время
-                    'end' => $endTime,      // Отправляем конвертированное время окончания (если есть)
+                    'description' => $event->description,
+                    'start' => $startTime,
+                    'end' => $endTime,
                     'allDay' => $event->all_day,
                     'backgroundColor' => $event->color,
                     'borderColor' => $event->color,
-                    'editable' => true,
+                    'editable' => $this->canEdit(), // Только админы могут редактировать
                     'extendedProps' => [
                         'event_id' => $event->id
                     ]
@@ -89,57 +77,45 @@ class EventManagement extends ComponentBase
 
             return ['events' => $events];
         } catch (\Exception $e) {
-            \Log::error('Ошибка при загрузке событий: ' . $e->getMessage());
             throw new ApplicationException('Ошибка при загрузке событий');
         }
     }
 
+    // Обновление события (только для администраторов)
     public function onUpdateEvent()
-{
-    $data = post();
+    {
+        $this->checkAdmin(); // Проверка прав администратора
 
-    \Log::info('Полученные данные для обновления события:', $data);
+        $data = post();
+        \Log::info('Полученные данные для обновления события:', $data);
 
-    if (empty($data['event_id'])) {
-        \Log::error('ID события не указан.');
-        throw new ApplicationException('ID события не указан.');
-    }
-
-    try {
-        $event = Event::find($data['event_id']);
-        if (!$event) {
-            \Log::error('Событие не найдено.');
-            throw new ApplicationException('Событие не найдено.');
+        if (empty($data['event_id'])) {
+            throw new ApplicationException('ID события не указан.');
         }
 
-        $event->title = $data['title'] ?? $event->title;
-        $event->description = $data['description'] ?? $event->description;
-        $event->start_time = Carbon::parse($data['start_time'])->format('Y-m-d H:i:s');
-        if (!empty($data['end_time'])) {
-            $event->end_time = Carbon::parse($data['end_time'])->format('Y-m-d H:i:s');
-        } else {
-            $event->end_time = null;  // Если end_time пустое, очищаем его
+        try {
+            $event = Event::find($data['event_id']);
+            if (!$event) {
+                throw new ApplicationException('Событие не найдено.');
+            }
+
+            $event->title = $data['title'] ?? $event->title;
+            $event->description = $data['description'] ?? $event->description;
+            $event->start_time = Carbon::parse($data['start_time'])->setTimezone('UTC');
+            $event->end_time = !empty($data['end_time']) ? Carbon::parse($data['end_time'])->setTimezone('UTC') : null;
+            $event->save();
+
+            return ['error' => false, 'message' => 'Событие успешно обновлено.'];
+        } catch (\Exception $e) {
+            return ['error' => true, 'message' => 'Произошла ошибка при обновлении события.'];
         }
-
-        // Логирование для проверки
-        \Log::info('Сохраненное время (start_time): ' . $event->start_time);
-        \Log::info('Сохраненное время (end_time): ' . ($event->end_time ?? 'null'));
-
-        $event->save();
-
-        \Log::info('Событие успешно обновлено: ID ' . $event->id);
-
-        return ['error' => false, 'message' => 'Событие успешно обновлено.'];
-    } catch (\Exception $e) {
-        \Log::error('Ошибка при обновлении события: ' . $e->getMessage());
-        return ['error' => true, 'message' => 'Произошла ошибка при обновлении события.'];
     }
-}
 
-
-
+    // Удаление события (только для администраторов)
     public function onDeleteEvent()
     {
+        $this->checkAdmin(); // Проверка прав администратора
+
         $eventId = post('event_id');
 
         if (!$eventId || !$event = Event::find($eventId)) {
@@ -148,11 +124,25 @@ class EventManagement extends ComponentBase
 
         try {
             $event->delete();
-
             return ['error' => false, 'message' => 'Событие успешно удалено.'];
         } catch (\Exception $e) {
-            \Log::error('Ошибка при удалении события: ' . $e->getMessage());
-            return ['error' => true, 'message' => 'Произошла ошибка при удалении события. Пожалуйста, повторите попытку.'];
+            return ['error' => true, 'message' => 'Произошла ошибка при удалении события.'];
         }
+    }
+
+    // Проверка прав пользователя (только для администраторов)
+    protected function checkAdmin()
+    {
+        $currentUser = Auth::getUser();
+        if (!$currentUser->is_superuser && !$currentUser->groups()->where('code', 'admins')->exists()) {
+            throw new ApplicationException('У вас нет прав для выполнения этого действия.');
+        }
+    }
+
+    // Проверка, может ли текущий пользователь редактировать события
+    protected function canEdit()
+    {
+        $currentUser = Auth::getUser();
+        return $currentUser->is_superuser || $currentUser->groups()->where('code', 'admins')->exists();
     }
 }

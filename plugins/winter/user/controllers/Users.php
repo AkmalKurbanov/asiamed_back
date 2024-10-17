@@ -16,6 +16,41 @@
 
   class Users extends Controller
   {
+
+
+      public function getNotifications()
+      {
+          $userId = Auth::getUser()->id;
+
+          $notifications = DB::table('user_notifications')
+              ->where('user_id', $userId)
+              ->where('is_read', false)
+              ->orderBy('created_at', 'desc')
+              ->limit(10)
+              ->get();
+
+          return response()->json([
+              'notifications' => $notifications
+          ]);
+      }
+    
+      public function getUnreadCount()
+      {
+          $userId = Auth::getUser()->id;
+
+          $unreadCount = DB::table('user_notifications')
+              ->where('user_id', $userId)
+              ->where('is_read', false)
+              ->count();
+
+          return response()->json([
+              'unreadCount' => $unreadCount
+          ]);
+      }
+
+
+
+
       /**
        * @var array Extensions implemented by this controller.
        */

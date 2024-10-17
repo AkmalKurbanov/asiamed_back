@@ -1,8 +1,10 @@
 
 $(function () {
+  
   var currColor = '#3c8dbc'; // Начальный цвет для событий
   var calendar; // Переменная для календаря
-
+ 
+  
   function initCalendar() {
     var calendarEl = document.getElementById('calendar');
 
@@ -24,18 +26,19 @@ $(function () {
       events: function (fetchInfo, successCallback, failureCallback) {
         $.request('eventManagement::onLoadEvents', {
           success: function (data) {
-            console.log('Данные, полученные с сервера:', data);
+            
 
             if (data.error) {
               failureCallback();
               toastr.error('Не удалось загрузить события');
             } else {
               var events = data.events.map(function (event) {
-                console.log('Обработанное событие:', event);
+              
 
                 var eventData = {
                   id: event.id,
                   title: event.title,
+                  description: event.description || '',
                   start: event.start, // Используем start
                   end: event.end,     // Используем end
                   backgroundColor: event.backgroundColor || currColor,
@@ -128,20 +131,38 @@ $(function () {
         });
       },
 
-      // Клик по событию для открытия модального окна
       eventClick: function (info) {
         openDeleteModal(info.event.id);
 
+        // Выводим данные события для отладки
+        console.log("Заголовок события:", info.event.title);
+        console.log("Описание события:", info.event.extendedProps.description);
+
         // Заполняем поля title и description
-        $('#event-title').val(info.event.title); // Заполняем поле для названия события
-        $('#event-description').val(info.event.extendedProps.description || '');
+        $('#event-title').val(info.event.title || ''); // Заполняем поле для названия события
+        $('#event-description').val(info.event.extendedProps.description || ''); // Заполняем поле для описания
 
         var startTime = info.event.start;
+        var endTime = info.event.end;
+
+        var modalContent = '';
 
         // Проверяем, является ли событие на весь день
         if (info.event.allDay) {
           // Скрываем поле выбора времени для событий на весь день
           $('#event-time').closest('.form-group').hide();
+
+          // Форматируем только дату для события на весь день
+          startTime = info.event.start ? moment(info.event.start).format('DD.MM.YYYY') : 'Не указано';
+          endTime = info.event.end ? moment(info.event.end).format('DD.MM.YYYY') : 'Не указано';
+
+          // Формируем содержимое для события на весь день
+          modalContent = `
+      <p><strong>Время начала:</strong> ${startTime}</p>
+      <p><strong>Время окончания:</strong> ${endTime}</p>
+      <p><strong>Название:</strong> ${info.event.title || 'Без названия'}</p>
+      <p><strong>Описание:</strong> ${info.event.extendedProps.description || 'Описание отсутствует'}</p>
+    `;
         } else {
           // Показываем поле выбора времени для обычных событий
           $('#event-time').closest('.form-group').show();
@@ -152,9 +173,26 @@ $(function () {
             // Форматируем время для input[type="datetime-local"]
             var formattedDate = localTime.format('YYYY-MM-DDTHH:mm');
             $('#event-time').val(formattedDate);
+
+            // Форматируем дату и время для модального окна
+            startTime = moment(startTime).format('DD.MM.YYYY HH:mm');
+          } else {
+            startTime = 'Не указано';
           }
+
+          // Формируем содержимое для обычного события
+          modalContent = `
+      <p><strong>Время:</strong> ${startTime}</p>
+      <p><strong>Название:</strong> ${info.event.title || 'Без названия'}</p>
+      <p><strong>Описание:</strong> ${info.event.extendedProps.description || 'Описание отсутствует'}</p>
+    `;
         }
+
+        // Заполняем модальное окно с данными о событии
+        $('.modal-body-user').html(modalContent);
       }
+
+
 
     });
 
@@ -202,6 +240,8 @@ $(function () {
         toastr.error('Произошла ошибка при создании события.');
       }
     });
+
+
   });
 
   /* Удаление событий */
@@ -252,9 +292,8 @@ $(function () {
 
   // Функция для обновления события при нажатии на #save-event
   $('#save-event').click(function () {
-    var eventTime = $('#event-time').val();
-    var eventTitle = $('#event-title').val(); // Получаем значение нового заголовка
-    var eventDescription = $('#event-description').val(); // Получаем значение нового описания
+    var eventTitle = $('#event-title').val();
+    var eventDescription = $('#event-description').val();
 
     if (!eventIdToDelete) {
       toastr.error('ID события отсутствует, обновление невозможно.');
@@ -269,11 +308,25 @@ $(function () {
     }
 
     var eventId = calendarEvent.extendedProps.event_id;
-    var updatedStartTime = new Date(eventTime).toISOString();
+    var updatedStartTime = null; // Инициализируем переменную для времени начала
+
+    // Проверяем, если событие не allDay, то обрабатываем время
+    if (!calendarEvent.allDay) {
+      var eventTime = $('#event-time').val();
+      if (eventTime) {
+        updatedStartTime = new Date(eventTime).toISOString();
+      } else {
+        toastr.error('Некорректное время события.');
+        return;
+      }
+    }
+
     var existingEndTime = calendarEvent.end ? calendarEvent.end.toISOString() : null;
 
     // Обновляем данные события в календаре
-    calendarEvent.setStart(updatedStartTime);
+    if (updatedStartTime) {
+      calendarEvent.setStart(updatedStartTime);
+    }
     calendarEvent.setProp('title', eventTitle);  // Обновляем заголовок
     calendarEvent.setExtendedProp('description', eventDescription);  // Обновляем описание
 
@@ -281,15 +334,16 @@ $(function () {
       calendarEvent.setEnd(existingEndTime);
     }
 
-    // Отправляем данные на сервер для обновления
+    // Формируем данные для отправки на сервер
     var eventData = {
       event_id: eventId,
-      start_time: updatedStartTime,
+      start_time: updatedStartTime || calendarEvent.start.toISOString(), // Если время не обновляли, берем текущее
       end_time: existingEndTime,
-      title: eventTitle, // Передаем новый заголовок
-      description: eventDescription // Передаем новое описание
+      title: eventTitle,
+      description: eventDescription
     };
 
+    // Отправляем данные на сервер для обновления
     $.request('eventManagement::onUpdateEvent', {
       data: eventData,
       success: function (response) {
@@ -307,6 +361,8 @@ $(function () {
     // Закрываем модальное окно
     $('#modal-warning').modal('hide');
   });
+
+
 
   // Функция для обновления события
   function updateEvent(event) {

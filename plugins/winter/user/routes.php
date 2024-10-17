@@ -22,4 +22,7 @@ Route::group(['middleware' => ['auth', 'can:manage-users']], function () {
     Route::put('/events/{id}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('events.destroy');
     
+    Route::get('/notifications/get', 'Users@getNotifications');
+    Route::get('/notifications/count', 'Users@getUnreadCount');
+
 });
