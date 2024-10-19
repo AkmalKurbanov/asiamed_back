@@ -7,6 +7,8 @@ use Winter\User\Models\Event;
 use Auth;
 use ApplicationException;
 use Carbon\Carbon;
+Carbon::setLocale('ru');
+use Illuminate\Support\Facades\DB;
 
 class EventManagement extends ComponentBase
 {
@@ -30,6 +32,8 @@ class EventManagement extends ComponentBase
 
         $data = post();
 
+         \Log::info('Полученные данные для создания события: ' . json_encode($data));
+
         if (empty($data['title']) || empty($data['start_time'])) {
             throw new ApplicationException('Необходимо заполнить название и время начала');
         }
@@ -45,8 +49,13 @@ class EventManagement extends ComponentBase
             $event->created_by = Auth::getUser()->id;
             $event->save();
 
+            // Создание уведомления о создании события с помощью хелпера
+            NotificationHelper::createNotification($event->id, 'Новое событие: ' . $event->title, 'События', 'event_created');
+
+
             return ['error' => false, 'message' => 'Событие успешно создано.', 'event_id' => $event->id];
         } catch (\Exception $e) {
+            \Log::error('Ошибка при создании события: ' . $e->getMessage());
             return ['error' => true, 'message' => 'Произошла ошибка при создании события.'];
         }
     }
@@ -105,6 +114,10 @@ class EventManagement extends ComponentBase
             $event->end_time = !empty($data['end_time']) ? Carbon::parse($data['end_time'])->setTimezone('UTC') : null;
             $event->save();
 
+            // Создание уведомления об обновлении события с помощью хелпера
+            NotificationHelper::createNotification($event->id, 'Событие обновлено: ' . $event->title, 'События', 'event_updated'); 
+
+
             return ['error' => false, 'message' => 'Событие успешно обновлено.'];
         } catch (\Exception $e) {
             return ['error' => true, 'message' => 'Произошла ошибка при обновлении события.'];
@@ -123,7 +136,12 @@ class EventManagement extends ComponentBase
         }
 
         try {
+            $eventTitle = $event->title; // Добавляем получение заголовка события
             $event->delete();
+
+            // Создание уведомления об удалении события с помощью хелпера
+            NotificationHelper::createNotification($eventId, 'Событие удалено: ' . $eventTitle, 'События', 'event_deleted');
+
             return ['error' => false, 'message' => 'Событие успешно удалено.'];
         } catch (\Exception $e) {
             return ['error' => true, 'message' => 'Произошла ошибка при удалении события.'];
@@ -145,4 +163,29 @@ class EventManagement extends ComponentBase
         $currentUser = Auth::getUser();
         return $currentUser->is_superuser || $currentUser->groups()->where('code', 'admins')->exists();
     }
+
+
+
+    protected function createNotification($entityId, $message, $category, $type = 'event')
+    {
+        // Выбираем пользователей, которым нужно отправить уведомление
+        $users = User::whereHas('groups', function ($query) {
+            $query->whereIn('code', ['doctors', 'admins']); // Врачи и администраторы
+        })->get();
+
+        foreach ($users as $user) {
+            DB::table('winter_user_notifications')->insert([
+                'user_id' => $user->id,
+                'type' => $type, // Передаем тип уведомления
+                'entity_id' => $entityId,
+                'category' => $category,
+                'is_read' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+    }
+
+
+
 }

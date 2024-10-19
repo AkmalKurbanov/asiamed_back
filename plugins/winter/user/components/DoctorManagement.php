@@ -12,6 +12,8 @@ Carbon::setLocale('ru');
 
 use Illuminate\Support\Facades\DB;
 
+use Winter\User\Helpers\NotificationHelper;
+
 class DoctorManagement extends ComponentBase
 {
     
@@ -36,11 +38,6 @@ class DoctorManagement extends ComponentBase
         } else {
             $this->loadDoctorsList();  // Загружаем список всех врачей
         }
-        
-        
-      
-
-
     }
 
     // Загружаем список врачей
@@ -210,6 +207,7 @@ protected function getNotificationText($type)
         'patient_attached' => 'Новый пациент',
         'appointment_scheduled' => 'Запись на приём',
         'message_received' => 'Новое сообщение',
+        'event' => 'Новое событие',
         // Добавьте другие типы уведомлений
     ];
 
@@ -220,6 +218,7 @@ protected function getNotificationText($type)
 public function onGetNotifications()
 {
     $userId = Auth::getUser()->id;
+    \Log::info('Запрос уведомлений для пользователя с ID: ' . $userId);
 
     // Получаем уведомления пользователя
     $notifications = DB::table('winter_user_notifications')
@@ -227,8 +226,16 @@ public function onGetNotifications()
         ->orderBy('created_at', 'desc')
         ->get();
 
+    \Log::info('Количество уведомлений для пользователя с ID: ' . $userId . ' - ' . $notifications->count());
+
+    // Логируем сами уведомления
+    if ($notifications->count() > 0) {
+        \Log::info('Уведомления для пользователя: ', $notifications->toArray());
+    }
+
     // Если уведомлений нет, возвращаем пустой массив
     if ($notifications->isEmpty()) {
+        \Log::info('Нет уведомлений для пользователя с ID: ' . $userId);
         return [
             'notifications' => []
         ];
@@ -237,13 +244,17 @@ public function onGetNotifications()
     // Форматируем уведомления
     $formattedNotifications = $notifications->map(function($notification) {
         return [
-        'id' => $notification->id,
-        'text' => $this->getNotificationText($notification->type), // Преобразуем тип в понятный текст
-        'category' => !empty($notification->category) ? $notification->category : 'Общие уведомления',
-        'time' => Carbon::parse($notification->created_at)->diffForHumans(),
-        'url' => url('/edit-patient/' . $notification->entity_id),
-    ];
+            'id' => $notification->id,
+            'type' => $notification->type,
+            'text' => $this->getNotificationText($notification->type),
+            'category' => !empty($notification->category) ? $notification->category : 'Общие уведомления',
+            'time' => Carbon::parse($notification->created_at)->diffForHumans(),
+            'url' => url('/edit-patient/' . $notification->entity_id),
+            'is_read' => $notification->is_read
+        ];
     });
+
+    \Log::info('Отформатированные уведомления для клиента: ', $formattedNotifications->toArray());
 
     return [
         'notifications' => $formattedNotifications

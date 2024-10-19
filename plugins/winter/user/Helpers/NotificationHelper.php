@@ -1,0 +1,33 @@
+<?php
+
+namespace Winter\User\Helpers;
+
+use Illuminate\Support\Facades\DB;
+
+class NotificationHelper
+{
+    public static function createNotification($userId, $entityId, $message, $category, $type)
+{
+    \Log::info('Создание уведомления для пользователя ID: ' . $userId);
+    \Log::info('Тип уведомления: ' . $type);
+    \Log::info('Категория уведомления: ' . $category);
+    \Log::info('Сообщение: ' . $message);
+
+    try {
+        DB::table('winter_user_notifications')->insert([
+            'user_id' => $userId,
+            'type' => $type,
+            'entity_id' => $entityId,
+            'category' => $category,
+            'is_read' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        \Log::info('Уведомление успешно создано');
+    } catch (\Exception $e) {
+        \Log::error('Ошибка при создании уведомления: ' . $e->getMessage());
+    }
+}
+
+}
