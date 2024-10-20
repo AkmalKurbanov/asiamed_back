@@ -1,59 +1,40 @@
+// Настраиваем глобальные обработчики AJAX для блокировки кнопки
+$(document).on('ajaxSetup', function (event, context) {
+  context.options.beforeSend = function () {
+    $("#patientForm").find("button[type='submit']").prop("disabled", true).text("Загрузка...");
+  };
+});
 
+// Разблокируем кнопку после завершения запроса
+$(document).on('ajaxComplete', function () {
+  $("#patientForm").find("button[type='submit']").prop("disabled", false).text("Зарегистрировать");
+});
 
-  // Настраиваем глобальные обработчики AJAX для блокировки кнопки
-  $(document).on('ajaxSetup', function (event, context) {
-    // Перед отправкой запроса
-    context.options.beforeSend = function () {
-      // Блокируем кнопку отправки
-      $("#patientForm").find("button[type='submit']").prop("disabled", true).text("Загрузка...");
-    };
-  });
-
-  // Разблокируем кнопку после завершения запроса
-  $(document).on('ajaxComplete', function () {
-    // Разблокируем кнопку
-    $("#patientForm").find("button[type='submit']").prop("disabled", false).text("Зарегистрировать");
-  });
-
-
+// Обработка ответа формы
 function handleFormResponse(data, formType) {
   if (data.error) {
-    // Выводим сообщение об ошибке
     toastr.error(data.message);
   } else {
-    // Выводим сообщение об успехе
     toastr.success(data.message);
     $("#patientForm")[0].reset();
     $("#doctor_id").val("").trigger("change");
 
-    // Обновляем информацию о враче
     if (data.doctor && data.doctor.name && data.doctor.surname) {
-      // Обновляем информацию о враче, если врач есть
       $("#doctor-info").html(
         "<b>Лечащий врач (Постоянный):</b> " +
         `<a href="/edit-doctor/${data.doctor.id}" class='float-right'>${data.doctor.name} ${data.doctor.surname}</a>` +
         '<button id="detach-doctor-button" class="btn btn-danger btn-xs float-right mt-2" onclick="detachDoctor(' +
         data.patient.id + ')">Открепить врача</button>'
       );
-
-      // Блокируем селект врача, так как врач назначен
       $("#doctor_id").prop("disabled", true);
     } else {
-      // Если врача нет (doctor_id null)
-      $("#doctor-info").html(
-        "<b>Лечащий врач (Постоянный):</b> <span class='float-right'>Не назначен</span>"
-      );
-
-      // Разблокируем селект врача, так как врач откреплен
+      $("#doctor-info").html("<b>Лечащий врач (Постоянный):</b> <span class='float-right'>Не назначен</span>");
       $("#doctor_id").prop("disabled", false);
     }
 
-    // Сбрасываем селект до дефолтного значения
-    $("#doctor_id").val(""); // Очищаем текущее значение
-    $("#doctor_id option:first").prop("selected", true); // Устанавливаем дефолтный option
-
-    // Скрываем чекбокс, так как действие завершено
-    $("#make_primary_container").addClass("d-none");;
+    $("#doctor_id").val("");
+    $("#doctor_id option:first").prop("selected", true);
+    $("#make_primary_container").addClass("d-none");
     $("#make_primary").prop("checked", false);
   }
 }
@@ -108,22 +89,20 @@ function detachDoctor(patientId) {
   });
 }
 
+// Скрываем чекбокс, если селект заблокирован
+if ($("#doctor_id").is(":disabled")) {
+  $("#make_primary_container").addClass("d-none");
+}
 
-  // Скрываем чекбокс, если селект заблокирован
-  if ($("#doctor_id").is(":disabled")) {
-    $("#make_primary_container").addClass("d-none");
+// Показываем чекбокс при выборе врача в селекте
+$("#doctor_id").on("change", function () {
+  var selectedValue = $(this).val();
+  if (selectedValue && selectedValue !== "Выберите врача") {
+    $("#make_primary_container").removeClass("d-none"); // Показываем чекбокс
+  } else {
+    $("#make_primary_container").addClass("d-none"); // Скрываем чекбокс
   }
-
-  // Показываем чекбокс при выборе врача в селекте
-  $("#doctor_id").on("change", function () {
-    var selectedValue = $(this).val();
-    if (selectedValue && selectedValue !== "Выберите врача") {
-      $("#make_primary_container").removeClass("d-none"); // Показываем чекбокс
-    } else {
-      $("#make_primary_container").addClass("d-none"); // Скрываем чекбокс
-    }
-  });
-
+});
 
 // Валидация формы
 $(function () {
@@ -338,88 +317,86 @@ if ($picker.length) {
   });
 }
 
+var calendarEl = document.getElementById("calendar");
+var calendar;
 
-  var calendarEl = document.getElementById("calendar");
-  var calendar;
+if (calendarEl) {
+  $("#modal-xl").on("shown.bs.modal", function (e) {
+    var doctorId = $("#doctor_id").val();
 
-  if (calendarEl) {
-    $("#modal-xl").on("shown.bs.modal", function (e) {
-      var doctorId = $("#doctor_id").val();
+    if (!doctorId) {
+      $('#modal-warning').modal('show');
+      $('#modal-xl').modal('hide');
+      return;
+    }
 
-      if (!doctorId) {
-        $('#modal-warning').modal('show');
-        $('#modal-xl').modal('hide');
-        return;
-      }
+    if (!calendar) {
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        locale: "ru",
+        buttonText: {
+          today: 'Сегодня'
+        },
+        buttonHints: {
+          prev: 'Предыдущий месяц',
+          next: 'Следующий месяц',
+        },
 
-      if (!calendar) {
-        calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: "dayGridMonth",
-          locale: "ru",
-          buttonText: {
-            today: 'Сегодня'
-          },
-          buttonHints: {
-            prev: 'Предыдущий месяц',
-            next: 'Следующий месяц',
-          },
+        events: function (fetchInfo, successCallback, failureCallback) {
+          $.request("onGetDoctorSchedule", {
+            dataType: "json",
+            data: {
+              doctor_id: doctorId,
+            },
+            success: function (data) {
+              if (data.error) {
+                console.error("Ошибка с сервера:", data.message);
+                alert("Ошибка с сервера: " + data.message);
+                return;
+              }
 
-          events: function (fetchInfo, successCallback, failureCallback) {
-            $.request("onGetDoctorSchedule", {
-              dataType: "json",
-              data: {
-                doctor_id: doctorId,
-              },
-              success: function (data) {
-                if (data.error) {
-                  console.error("Ошибка с сервера:", data.message);
-                  alert("Ошибка с сервера: " + data.message);
-                  return;
-                }
+              var now = new Date();
+              var events = data.times
+                .filter(function (item) {
+                  var eventDate = new Date(item.start);
+                  return eventDate >= now;
+                })
+                .map(function (item) {
+                  return {
+                    title: item.title || "Запись",
+                    start: item.start,
+                    end: item.end,
+                    allDay: false,
+                  };
+                });
 
-                var now = new Date();
-                var events = data.times
-                  .filter(function (item) {
-                    var eventDate = new Date(item.start);
-                    return eventDate >= now;
-                  })
-                  .map(function (item) {
-                    return {
-                      title: item.title || "Запись",
-                      start: item.start,
-                      end: item.end,
-                      allDay: false,
-                    };
-                  });
+              successCallback(events);
+            },
+            error: function () {
+              alert("Ошибка при загрузке расписания врача");
+              failureCallback();
+            },
+          });
+        },
+        eventTimeFormat: {
+          hour: "2-digit",
+          minute: "2-digit",
+          meridiem: false,
+          hour12: false,
+        },
+      });
 
-                successCallback(events);
-              },
-              error: function () {
-                alert("Ошибка при загрузке расписания врача");
-                failureCallback();
-              },
-            });
-          },
-          eventTimeFormat: {
-            hour: "2-digit",
-            minute: "2-digit",
-            meridiem: false,
-            hour12: false,
-          },
-        });
+      calendar.render();
+    } else {
+      calendar.refetchEvents();
+    }
+  });
 
-        calendar.render();
-      } else {
-        calendar.refetchEvents();
-      }
-    });
-
-    $("#modal-xl").on("hidden.bs.modal", function (e) {
-      calendar.destroy();
-      calendar = null;
-    });
-  }
-
+  $("#modal-xl").on("hidden.bs.modal", function (e) {
+    calendar.destroy();
+    calendar = null;
+  });
+}
 
 // Поиск пациентов
 $("#patient_search").on("keyup", function () {
@@ -439,9 +416,8 @@ $("#doctor_search").on("keyup", function () {
   });
 });
 
-
-
-var bookedTimes = []; // Массив для хранения забронированных времен
+// Массив для хранения забронированных времен
+var bookedTimes = [];
 
 // Функция для получения забронированных времен
 function getBookedTimes(doctorId, selectedDate) {
@@ -479,22 +455,19 @@ $("#appointment_time").on("change", function () {
   }
 });
 
-
-
-
 $("#visit_type").on("change", function () {
   var selectedType = $(this).val();
 
   if (selectedType === "амбулаторный") {
     $(".for-type-js").addClass("d-none"); // Скрываем элементы для амбулаторного визита
-    
+
     // Сбрасываем селект с врачами на значение по умолчанию
     $("#doctor_id").val("").trigger("change");
 
     // Скрываем чекбокс и сбрасываем его
     $("#make_primary").prop("checked", false);
     $("#make_primary_container").addClass("d-none");
-  
+
   } else if (selectedType === "стационарный") {
     $(".for-type-js").removeClass("d-none"); // Показываем элементы для стационарного визита
   } else {
@@ -502,3 +475,24 @@ $("#visit_type").on("change", function () {
   }
 });
 
+
+// Показываем/скрываем поля при выборе "с визитом"
+$("#with_visit").on("change", function () {
+  if ($(this).is(":checked")) {
+    $("#visit-details").removeClass("d-none");
+  } else {
+    $("#visit-details").addClass("d-none");
+    $("#visit_type").val("");
+    $(".for-type-js").addClass("d-none");
+  }
+});
+
+// Показываем поля для стационарного визита при выборе типа визита
+$("#visit_type").on("change", function () {
+  var selectedType = $(this).val();
+  if (selectedType === "стационарный") {
+    $(".for-type-js").removeClass("d-none");
+  } else {
+    $(".for-type-js").addClass("d-none");
+  }
+});

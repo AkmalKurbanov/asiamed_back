@@ -204,8 +204,8 @@ class DoctorManagement extends ComponentBase
 protected function getNotificationText($type)
 {
     $notificationTypes = [
-        'patient_attached' => 'Новый пациент',
-        'appointment_scheduled' => 'Запись на приём',
+        'patient_booked' => 'Новый пациент',
+        'patient_attached' => 'Запись на приём',
         'message_received' => 'Новое сообщение',
         'event' => 'Новое событие',
         // Добавьте другие типы уведомлений
@@ -222,18 +222,18 @@ public function onGetNotifications()
 
     // Получаем уведомления пользователя
     $notifications = DB::table('winter_user_notifications')
-        ->where('user_id', $userId)
-        ->orderBy('created_at', 'desc')
-        ->get();
+      ->where('user_id', $userId)
+      ->orderBy('created_at', 'desc')
+      ->get();
 
-    \Log::info('Количество уведомлений для пользователя с ID: ' . $userId . ' - ' . $notifications->count());
+     \Log::info('Количество уведомлений для пользователя с ID: ' . $userId . ' - ' . $notifications->count());
 
     // Логируем сами уведомления
     if ($notifications->count() > 0) {
         \Log::info('Уведомления для пользователя: ', $notifications->toArray());
     }
 
-    // Если уведомлений нет, возвращаем пустой массив
+      // Если уведомлений нет, возвращаем пустой массив
     if ($notifications->isEmpty()) {
         \Log::info('Нет уведомлений для пользователя с ID: ' . $userId);
         return [
@@ -241,14 +241,16 @@ public function onGetNotifications()
         ];
     }
 
-    // Форматируем уведомления
+     // Форматируем уведомления
     $formattedNotifications = $notifications->map(function($notification) {
         return [
             'id' => $notification->id,
             'type' => $notification->type,
             'text' => $this->getNotificationText($notification->type),
             'category' => !empty($notification->category) ? $notification->category : 'Общие уведомления',
-            'time' => Carbon::parse($notification->created_at)->diffForHumans(),
+            'time' => Carbon::parse($notification->created_at)->diffForHumans([
+                'short' => true,  // Краткий формат времени
+            ]),
             'url' => url('/edit-patient/' . $notification->entity_id),
             'is_read' => $notification->is_read
         ];

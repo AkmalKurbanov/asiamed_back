@@ -14,7 +14,7 @@ is_hidden = 0
     <div class="card-body">
       <p class="login-box-msg">Регистрация нового пациента</p>
 
-      <form id="patientForm" data-request="patientManagement::onCreatePatient" data-request-success="handleFormResponse(data, 'createPatient')" class="validate-form">
+      {# <form id="patientForm" data-request="patientManagement::onCreatePatient" data-request-success="handleFormResponse(data, 'createPatient')" class="validate-form">
         <div class="input-group mb-3 form-group">
           <input id="name" name="name" type="text" class="form-control" placeholder="Имя">
           <div class="input-group-append">
@@ -105,7 +105,106 @@ is_hidden = 0
 
         <button type="submit" class="btn btn-primary btn-block">Зарегистрировать</button>
         
-      </form>
+      </form> #}
+
+      <form id="patientForm" data-request="patientManagement::onCreatePatient" data-request-success="handleFormResponse(data, 'createPatient')" class="validate-form">
+  <div class="input-group mb-3 form-group">
+    <input id="name" name="name" type="text" class="form-control" placeholder="Имя">
+    <div class="input-group-append">
+      <div class="input-group-text">
+        <span class="fas fa-user"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-group mb-3 form-group">
+    <input id="surname" name="surname" type="text" class="form-control" placeholder="Фамилия">
+    <div class="input-group-append">
+      <div class="input-group-text">
+        <span class="fas fa-user"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-group mb-3 form-group">
+    <input id="iu_telephone" name="iu_telephone" type="text" class="form-control" placeholder="Телефон" data-inputmask='"mask": "0(999) 999-999"' data-mask>
+    <div class="input-group-append">
+      <div class="input-group-text">
+        <span class="fas fa-phone"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Чекбокс для выбора с визитом -->
+  <div class="form-group">
+    <label>Записать на прием?</label>
+    <div class="icheck-primary">
+      <input type="checkbox" id="with_visit" name="with_visit">
+      <label for="with_visit">Да, записать</label>
+    </div>
+  </div>
+
+  <!-- Поля, которые показываются при выборе "с визитом" -->
+  <div id="visit-details" class="d-none">
+    <div class="form-group">
+      <label>Тип визита</label>
+      <select class="form-control select" style="width: 100%;" id="visit_type" name="visit_type">
+        <option value="" selected="selected">Выберите тип</option>
+        <option value="амбулаторный">Амбулаторный</option>
+        <option value="стационарный">Стационарный</option>
+      </select>
+    </div>
+
+    <div class="form-group d-none for-type-js">
+      <label>Врач</label>
+      <select class="form-control select2" style="width: 100%;" id="doctor_id" name="doctor_id">
+        <option value="" selected="selected">Выберите врача</option>
+        {% for doctor in patientManagement.loadDoctorsList() %}
+          <option value="{{ doctor.id }}">{{ doctor.name }} {{ doctor.surname }} ({{ doctor.iu_job }})</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group clearfix">
+      <div class="icheck-primary d-none" id="make_primary_container">
+        <input type="checkbox" id="make_primary" name="make_primary">
+        <label for="make_primary">Постоянный лечащий врач</label>
+      </div>
+    </div>
+
+    <div class="form-group row d-none for-type-js">
+      <div class="col-6">
+        <div class="form-group m-0">
+          <label>Выберите дату:</label>
+          <div class="input-group date" id="datepicker" data-target-input="nearest">
+            <input id="appointment_date" name="appointment_date" type="text" class="form-control datetimepicker-input" data-target="#datepicker" disabled>
+            <div class="input-group-append" data-target="#datepicker" data-toggle="datetimepicker" id="datepicker-icon">
+              <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="form-group m-0">
+          <label>Время:</label>
+          <div class="input-group date" id="timepicker" data-target-input="nearest">
+            <input id="appointment_time" name="appointment_time" type="text" class="form-control datetimepicker-input" data-target="#timepicker" disabled>
+            <div class="input-group-append" data-target="#timepicker" data-toggle="datetimepicker">
+              <div class="input-group-text"><i class="fa fa-clock"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group d-none" id="detailed-schedule">
+      <a href="#" class="badge badge-success" data-toggle="modal" data-target="#modal-xl">Подробное расписание</a>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary btn-block">Зарегистрировать</button>
+</form>
 
       
     </div>
