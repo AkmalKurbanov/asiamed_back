@@ -218,45 +218,61 @@ protected function getNotificationText($type)
 public function onGetNotifications()
 {
     $userId = Auth::getUser()->id;
-    \Log::info('Запрос уведомлений для пользователя с ID: ' . $userId);
-
-    // Получаем уведомления пользователя
+ 
+    // Получаем только непрочитанные уведомления
     $notifications = DB::table('winter_user_notifications')
       ->where('user_id', $userId)
+      ->where('is_read', false) // Добавляем фильтр только для непрочитанных
       ->orderBy('created_at', 'desc')
       ->get();
 
-     \Log::info('Количество уведомлений для пользователя с ID: ' . $userId . ' - ' . $notifications->count());
-
-    // Логируем сами уведомления
-    if ($notifications->count() > 0) {
-        \Log::info('Уведомления для пользователя: ', $notifications->toArray());
-    }
+   
+  
 
       // Если уведомлений нет, возвращаем пустой массив
     if ($notifications->isEmpty()) {
-        \Log::info('Нет уведомлений для пользователя с ID: ' . $userId);
+        
         return [
             'notifications' => []
         ];
     }
 
-     // Форматируем уведомления
-    $formattedNotifications = $notifications->map(function($notification) {
-        return [
-            'id' => $notification->id,
-            'type' => $notification->type,
-            'text' => $this->getNotificationText($notification->type),
-            'category' => !empty($notification->category) ? $notification->category : 'Общие уведомления',
-            'time' => Carbon::parse($notification->created_at)->diffForHumans([
-                'short' => true,  // Краткий формат времени
-            ]),
-            'url' => url('/edit-patient/' . $notification->entity_id),
-            'is_read' => $notification->is_read
-        ];
-    });
+    
+    // Форматируем уведомления
 
-    \Log::info('Отформатированные уведомления для клиента: ', $formattedNotifications->toArray());
+    $formattedNotifications = $notifications->map(function($notification) {
+    // Проверяем тип уведомления и назначаем правильный URL
+    switch ($notification->type) {
+        case 'patient_booked':
+            // Для записанных на прием пациентов
+            $url = url('/doctor-booked-patients');
+            break;
+        case 'patient_attached':
+            // Для постоянных пациентов
+            $url = url('/doctor-attached-patients');
+            break;
+        default:
+            // По умолчанию на страницу с уведомлениями
+            $url = url('/notifications');
+            break;
+    }
+
+    return [
+        'id' => $notification->id,
+        'type' => $notification->type,
+        'text' => $this->getNotificationText($notification->type),
+        'category' => !empty($notification->category) ? $notification->category : 'Общие уведомления',
+        'time' => Carbon::parse($notification->created_at)->diffForHumans([
+            'short' => true,  // Краткий формат времени
+        ]),
+        'url' => $url,  // Устанавливаем URL для каждого типа уведомления
+        'is_read' => $notification->is_read
+    ];
+
+    
+  });
+  
+  
 
     return [
         'notifications' => $formattedNotifications
@@ -279,26 +295,36 @@ public function onGetUnreadCount()
     ];
 }
 
+// Пример расположения метода
 public function onMarkNotificationAsRead()
 {
     $notificationId = post('notification_id');
-    \Log::info('Notification ID: ' . $notificationId);
+    $notificationType = post('notification_type'); // Получаем тип уведомления
+
 
     $userId = Auth::getUser()->id;
-    \Log::info('User ID: ' . $userId);
+ 
 
+    // Обновляем уведомление по ID и типу
     $affectedRows = DB::table('winter_user_notifications')
         ->where('id', $notificationId)
         ->where('user_id', $userId)
+        ->where('type', $notificationType) // Фильтруем по типу
         ->update(['is_read' => true, 'updated_at' => now()]);
 
-    \Log::info('Rows updated: ' . $affectedRows);
+ 
 
     if ($affectedRows == 0) {
-        \Log::error('Ошибка: уведомление не обновлено');
+       
     }
 
     return ['message' => 'Уведомление отмечено как прочитанное'];
 }
+
+
+
+
+
+
 
 }

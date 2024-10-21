@@ -16,9 +16,27 @@ function handleFormResponse(data, formType) {
     toastr.error(data.message);
   } else {
     toastr.success(data.message);
+
+    // Сброс формы
     $("#patientForm")[0].reset();
+
+    // Сброс селекта для врачей
     $("#doctor_id").val("").trigger("change");
 
+    // Сброс даты и времени
+    $("#appointment_date").val("").prop("disabled", true);
+    $("#appointment_time").val("").prop("disabled", true);
+
+    // Сброс чекбоксов
+    $("#with_visit").prop("checked", false);
+    $("#make_primary").prop("checked", false);
+
+    // Скрытие элементов для типа визита
+    $("#visit-details").addClass("d-none");
+    $(".for-type-js").addClass("d-none");
+    $("#make_primary_container").addClass("d-none");
+
+    // Если был выбран врач и он остается постоянным, обновляем информацию о нем
     if (data.doctor && data.doctor.name && data.doctor.surname) {
       $("#doctor-info").html(
         "<b>Лечащий врач (Постоянный):</b> " +
@@ -32,12 +50,14 @@ function handleFormResponse(data, formType) {
       $("#doctor_id").prop("disabled", false);
     }
 
+    // Сброс селекта и чекбокса для назначения постоянного врача
     $("#doctor_id").val("");
     $("#doctor_id option:first").prop("selected", true);
-    $("#make_primary_container").addClass("d-none");
     $("#make_primary").prop("checked", false);
+    $("#make_primary_container").addClass("d-none");
   }
 }
+
 
 // Функция открепления врача
 function detachDoctor(patientId) {
@@ -401,11 +421,20 @@ if (calendarEl) {
 // Поиск пациентов
 $("#patient_search").on("keyup", function () {
   var query = $(this).val();
+
   $.request("onSearchPatients", {
     data: { search_query: query },
-    update: { patient_list: "#patient_list" },
+    success: function (data) {
+      // Обновляем содержимое таблицы вручную
+      $("#patient_list").html(data['#patient_list']);
+    },
+    error: function () {
+      console.error('Ошибка при поиске пациентов.');
+    }
   });
 });
+
+
 
 // Поиск врачей
 $("#doctor_search").on("keyup", function () {
@@ -496,3 +525,70 @@ $("#visit_type").on("change", function () {
     $(".for-type-js").addClass("d-none");
   }
 });
+
+
+
+
+// Фильтрация записей
+// $(function () {
+//   $('#bookedfilter').daterangepicker({
+//     locale: {
+//       format: 'DD.MM.YYYY',
+//       daysOfWeek: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+//       monthNames: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+//       applyLabel: 'Применить',
+//       cancelLabel: 'Отмена',
+//     }
+//   });
+
+//   $('#bookedfilter').on('apply.daterangepicker', function (ev, picker) {
+//     $(this).val(picker.startDate.format('DD.MM.YYYY') + ' - ' + picker.endDate.format('DD.MM.YYYY'));
+//   });
+
+//   $('#bookedfilter').on('cancel.daterangepicker', function (ev, picker) {
+//     $(this).val('');
+//   });
+
+//   // Обработчик клика по кнопке "Применить фильтр"
+//   $(document).on('click', '.applyBtn', function () {
+//     const selectedDates = $('#bookedfilter').val();
+//     if (selectedDates) {
+//       const dateRange = selectedDates.split(' - ');  // Разделяем диапазон дат
+//       const startDate = dateRange[0];
+//       const endDate = dateRange[1];
+
+//       // Отправка выбранного диапазона дат на сервер для фильтрации
+//       $.request('onFilterAppointmentsByDate', {
+//         data: { start_date: startDate, end_date: endDate },  // Отправляем две переменные
+//         success: function (response) {
+//           $('#patient_list').html(response['#patient_list']);  // Обновляем таблицу
+//         },
+//         error: function () {
+//           toastr.error('Произошла ошибка при фильтрации');  // Сообщение об ошибке через Toastr
+//         }
+//       });
+//     }
+//   });
+
+//   // Обработчик клика по кнопке "Сбросить фильтр"
+//   $('#reset-filter').on('click', function () {
+//     $('#bookedfilter').val('');  // Сбрасываем значение поля
+//     // Отправка запроса на сервер для получения всех пациентов без фильтрации
+//     $.request('onFilterAppointmentsByDate', {
+//       data: { start_date: '', end_date: '' },  // Передаем пустые даты
+//       success: function (response) {
+//         if (response.error) {
+//           toastr.error(response.message || 'Ошибка при сбросе фильтра');
+//         } else {
+//           // Проверяем, что результат содержится в response и обновляем список
+//           $('#patient_list').html(response['#patient_list']);  // Обновляем список пациентов
+//           toastr.success('Фильтр сброшен');
+//         }
+//       },
+//       error: function () {
+//         toastr.error('Произошла ошибка при сбросе фильтра');
+//       }
+//     });
+//   });
+
+// });

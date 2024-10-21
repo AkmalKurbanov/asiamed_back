@@ -52,7 +52,7 @@ redirect = "/login"
                     </tr>
                   </thead>
                   <tbody id="patient_list">
-                    {% partial 'patient_list' patients=attachedPatients show_doctor=false %}
+                   {% partial 'patient_list' patients=attachedPatients newAttachedPatients=newAttachedPatients show_doctor=false %}
                   </tbody>
                 </table>
               </div>

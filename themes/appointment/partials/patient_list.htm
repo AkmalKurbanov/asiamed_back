@@ -1,41 +1,55 @@
 {% if patients is not empty %}
+  {% set hasFutureAppointments = false %}
   {% for patient in patients %}
-    <tr>
-      <td>{{ patient.name }}</td>
-      <td>{{ patient.surname }}</td>
-      <td>{{ patient.birthdate|date('d.m.Y') }}</td>
-      <td>{{ patient.iu_telephone }}</td>
-      {% if show_doctor %}
-        <td>{{ patient.doctor ? patient.doctor.name : 'Не назначен' }}</td>
-      {% endif %}
-      
-      {% if this.page.fileName == 'doctor-booked-patients.htm' %}
-       
-        {% if patient.appointments is not empty %}
-          {% for appointment in patient.appointments %}
-            <td>{{ appointment.appointment_date|date('d.m.Y') }}</td>
-          {% endfor %}
-        {% else %}
-            <p>Нет записей на прием</p>
+    {% if this.page.fileName == 'doctor-booked-patients.htm' %}
+      {% set futureAppointments = patient.appointments|filter(appointment => appointment.appointment_date|date('Y-m-d') >= 'now'|date('Y-m-d')) %}
+    {% endif %}
+    
+    {% if futureAppointments is not empty or this.page.fileName == 'doctor-attached-patients.htm' %}
+      {% set hasFutureAppointments = true %}
+      <tr class="
+        {% if this.page.fileName == 'doctor-attached-patients.htm' and patient.id in newAttachedPatients %}
+          new-patient
+        {% elseif this.page.fileName == 'doctor-booked-patients.htm' and patient.id in newBookedPatients %}
+          new-patient
         {% endif %}
-      
-      {% else %}
-      {% endif %}
-      
-      
-      <td>
-        <div class="btn-group">
-          <button type="button" class="btn btn-success dropdown-toggle dropdown-hover dropdown-icon" data-toggle="dropdown">
-            <span>Открыть</span>
-          </button>
-          <div class="dropdown-menu" role="menu">
-            <a class="dropdown-item" href="{{ 'edit-patient' | page({ patient_id: patient.id }) }}">Редактировать профиль</a>
-            <a class="dropdown-item" href="{{ 'appointment-patient' | page({ patient_id: patient.id }) }}">Записать на прием</a>
+      ">
+        <td>{{ patient.name }}</td>
+        <td>{{ patient.surname }}</td>
+        <td>{{ patient.birthdate|date('d.m.Y') }}</td>
+        <td>{{ patient.iu_telephone }}</td>
+        {% if show_doctor %}
+          <td>{{ patient.doctor ? patient.doctor.name : 'Не назначен' }}</td>
+        {% endif %}
+
+        {% if this.page.fileName == 'doctor-booked-patients.htm' %}
+          <td>
+            {% for appointment in futureAppointments %}
+              {{ appointment.appointment_date|date('d.m.Y') }}
+            {% endfor %}
+          </td>
+        {% endif %}
+
+        <td>
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-success dropdown-toggle dropdown-hover dropdown-icon" data-toggle="dropdown">
+              <span>Открыть</span>
+            </button>
+            <div class="dropdown-menu" role="menu">
+              <a class="dropdown-item" href="{{ 'edit-patient' | page({ patient_id: patient.id }) }}">Редактировать профиль</a>
+              <a class="dropdown-item" href="{{ 'appointment-patient' | page({ patient_id: patient.id }) }}">Записать на прием</a>
+            </div>
           </div>
-        </div>
-      </td>
-    </tr>
+        </td>
+      </tr>
+    {% endif %}
   {% endfor %}
+
+  {% if not hasFutureAppointments %}
+    <tr>
+      <td colspan="6">Пациенты не найдены.</td>
+    </tr>
+  {% endif %}
 {% else %}
   <tr>
     <td colspan="6">Пациенты не найдены.</td>

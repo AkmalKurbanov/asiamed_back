@@ -37,7 +37,7 @@ redirect = "login"
   {% else %}
   {% endif %}
 
-  {% if this.page.fileName  == 'admin-calendar.htm' %}
+  {% if this.page.fileName  == 'calendar.htm' %}
 <link rel="stylesheet" href="{{'assets/plugins/fullcalendar/main.css'|theme}}">
 <link rel="stylesheet" href="{{'assets/plugins/toastr/toastr.min.css'|theme}}">
 <link rel="stylesheet" href="{{'assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css'|theme}}">
@@ -45,6 +45,12 @@ redirect = "login"
 
 {% endif %} 
 
+{% if this.page.fileName  == 'doctor-booked-patients.htm' %}
+  <link rel="stylesheet" href="{{'assets/plugins/daterangepicker/daterangepicker.css'|theme}}">
+  <link rel="stylesheet" href="{{'assets/plugins/toastr/toastr.min.css'|theme}}">
+  {% else %}
+
+{% endif %} 
   <!-- Theme style -->
   <link rel="stylesheet" href="{{'assets/dist/css/adminlte.min.css'|theme}}">
   <link rel="stylesheet" href="{{'assets/css/custom.css'|theme}}">
@@ -363,11 +369,11 @@ redirect = "login"
           </li>
           <li class="nav-header">EXAMPLES</li>
           <li class="nav-item">
-            <a href="" class="nav-link">
+            <a href="{{'admin-calendar'|page}}" class="nav-link">
               <i class="nav-icon fas fa-calendar-alt"></i>
               <p>
-                Calendar
-                <span class="badge badge-info right">2</span>
+                Календарь
+                <span class="badge badge-info right">0</span>
               </p>
             </a>
           </li>
@@ -800,7 +806,7 @@ redirect = "login"
 {% else %}
 {% endif %}
 
-{% if this.page.fileName  == 'admin-calendar.htm' %}
+{% if this.page.fileName  == 'calendar.htm' %}
 <script src="{{'assets/plugins/jquery-ui/jquery-ui.min.js'|theme}}"></script>
 <script src="{{'assets/plugins/fullcalendar/main.js'|theme}}"></script>
 <script src="{{'assets/plugins/moment/moment.min.js'|theme}}"></script>
@@ -809,15 +815,61 @@ redirect = "login"
 <script src="{{'assets/plugins/moment/moment-timezone-with-data.min.js'|theme}}"></script>
 <script src="{{'assets/javascript/calendar.js'|theme}}"></script>
 <script src="{{'assets/plugins/toastr/toastr.min.js'|theme}}"></script>
-  
-  
 
   {% else %}
 
-{% endif %} 
+{% endif %}
+
+{% if this.page.fileName  == 'doctor-booked-patients.htm' %}
+<script src="{{'assets/plugins/moment/moment.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/moment/moment-with-locales.min.js'|theme}}"></script>
+<script src="{{'assets/plugins/daterangepicker/daterangepicker.js'|theme}}"></script>
+
+  {% else %}
+
+{% endif %}
 
 <script src="{{'assets/javascript/custom.js'|theme}}"></script> 
 <script src="{{'assets/javascript/notifications.js'|theme}}"></script> 
+
+{% if this.page.fileName  == 'doctor-attached-patients.htm' %}
+  <script>
+    $(document).ready(function () {
+      // Добавляем класс "new-patient" ко всем новым уведомлениям
+      $('#patient_list tr').each(function() {
+        if ($(this).data('is-new')) {
+          $(this).addClass('new-patient');
+        }
+      });
+
+      // Задержка перед пометкой уведомлений как прочитанных
+      setTimeout(function() {
+        markNotificationsAsRead('patient_attached');
+      }, 3000);  // Задержка в 3 секунды
+    });
+  </script>
+{% endif %}
+
+{% if this.page.fileName  == 'doctor-booked-patients.htm' %}
+<script src="{{'assets/plugins/toastr/toastr.min.js'|theme}}"></script>
+  <script>
+    $(document).ready(function () {
+      // Добавляем класс "new-patient" ко всем новым уведомлениям
+      $('#patient_list tr').each(function() {
+        if ($(this).data('is-new')) {
+          $(this).addClass('new-patient');
+        }
+      });
+
+      // Задержка перед пометкой уведомлений как прочитанных
+      setTimeout(function() {
+        markNotificationsAsRead('patient_booked');
+      }, 3000);  // Задержка в 3 секунды
+    });
+  </script>
+{% endif %}
+
+
   {% snowboard all %}
   {% framework %}
   {% scripts %}
