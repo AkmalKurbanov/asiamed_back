@@ -17,7 +17,7 @@ description = "AdminLTE layout"
   <!-- overlayScrollbars -->
   <link rel="stylesheet" href="{{'assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css'|theme}}">
 
-  {% if this.page.fileName  == 'create-patient.htm' %}
+  {% if this.page.fileName  == 'create-patient.htm' or this.page.fileName  == 'create-appointment.htm' %}
 <link rel="stylesheet" href="{{'assets/plugins/select2/css/select2.min.css'|theme}}">
 <link rel="stylesheet" href="{{'assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css'|theme}}">
 <link rel="stylesheet" href="{{'assets/plugins/toastr/toastr.min.css'|theme}}">
@@ -33,7 +33,7 @@ description = "AdminLTE layout"
   {% styles %}
 </head>
 
-{% if this.page.fileName == 'create-patient.htm' %}
+{% if this.page.fileName == 'create-patient.htm' or this.page.fileName == 'create-appointment.htm'%}
   <body class="hold-transition register-page">
   
   {% elseif this.page.fileName == 'login.htm' %}
@@ -77,7 +77,7 @@ description = "AdminLTE layout"
 <script src="{{'assets/plugins/jquery-validation/jquery.validate.min.js'|theme}}"></script>
 <script src="{{'assets/plugins/jquery-validation/additional-methods.min.js'|theme}}"></script>
 
-{% if this.page.fileName  == 'create-patient.htm' %}
+{% if this.page.fileName  == 'create-patient.htm' or this.page.fileName  == 'create-appointment.htm' %}
 <script src="{{'assets/plugins/select2/js/select2.full.min.js'|theme}}"></script>
 <script src="{{'assets/plugins/select2/js/i18n/ru.js'|theme}}"></script>
 <script src="{{'assets/plugins/toastr/toastr.min.js'|theme}}"></script>

@@ -1,4 +1,6 @@
-<?php namespace Winter\User\Components;
+<?php
+
+namespace Winter\User\Components;
 
 use Cms\Classes\ComponentBase;
 use Winter\User\Models\User;

@@ -8,10 +8,10 @@ class NotificationHelper
 {
     public static function createNotification($userId, $entityId, $message, $category, $type)
 {
-    \Log::info('Создание уведомления для пользователя ID: ' . $userId);
-    \Log::info('Тип уведомления: ' . $type);
-    \Log::info('Категория уведомления: ' . $category);
-    \Log::info('Сообщение: ' . $message);
+    
+    
+    
+    
 
     try {
         DB::table('winter_user_notifications')->insert([
@@ -24,7 +24,7 @@ class NotificationHelper
             'updated_at' => now(),
         ]);
 
-        \Log::info('Уведомление успешно создано');
+        
     } catch (\Exception $e) {
         \Log::error('Ошибка при создании уведомления: ' . $e->getMessage());
     }

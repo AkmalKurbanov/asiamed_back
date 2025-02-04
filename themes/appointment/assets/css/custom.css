@@ -23,3 +23,8 @@
 .new-patient {
     background-color: #3f6791; 
 }
+
+#select2-patient_id-results .select2-results__option {
+  font-size: 13px;
+}
+

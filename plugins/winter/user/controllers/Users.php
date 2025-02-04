@@ -1,4 +1,5 @@
-  <?php namespace Winter\User\Controllers;
+<?php
+namespace Winter\User\Controllers;
 
   use Auth;
   use Lang;

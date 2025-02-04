@@ -62,7 +62,7 @@ class PatientManagement extends ComponentBase
     protected function loadPatients()
     {
         $currentUser = Auth::getUser();
-        
+
         // Получаем уведомления о новых пациентах
         $newPatientNotifications = DB::table('winter_user_notifications')
             ->where('user_id', $currentUser->id)
@@ -77,6 +77,11 @@ class PatientManagement extends ComponentBase
                     $query->where('code', 'patients');
                 })
                 ->get();
+            
+            // Логируем количество пациентов
+            \Log::info('Количество пациентов: ' . $patients->count());
+
+            $this->page['patients'] = $patients;  // Передаем пациентов в страницу
         }
         // Для врача загружаем список пациентов с будущими приемами и прикрепленных пациентов
         else if ($currentUser->groups()->where('code', 'doctors')->exists()) {
@@ -95,6 +100,22 @@ class PatientManagement extends ComponentBase
                 })
                 ->get();
 
+            // Логируем количество записанных на прием пациентов
+            \Log::info('Количество записанных пациентов: ' . $bookedPatients->count());
+
+            // Логируем информацию о каждом пациенте и его приемах
+            foreach ($bookedPatients as $patient) {
+                \Log::info('Пациент: ' . $patient->name . ' ' . $patient->surname);
+                \Log::info('Количество приемов для пациента: ' . $patient->appointments->count());
+
+                // Логируем будущие приемы пациента
+                $futureAppointments = $patient->appointments->filter(function($appointment) {
+                    return $appointment->appointment_date >= Carbon::now()->startOfDay();
+                });
+
+                \Log::info('Будущие приемы: ' . $futureAppointments->count());
+            }
+
             // Прикрепленные пациенты
             $attachedPatients = User::with('doctor')
                 ->where('doctor_id', $doctorId)
@@ -102,6 +123,9 @@ class PatientManagement extends ComponentBase
                     $query->where('code', 'patients');
                 })
                 ->get();
+
+            // Логируем количество прикрепленных пациентов
+            \Log::info('Количество прикрепленных пациентов: ' . $attachedPatients->count());
 
             // Фильтрация новых пациентов (на основе уведомлений)
             $newBookedPatients = $bookedPatients->filter(function ($patient) use ($newPatientNotifications) {
@@ -123,8 +147,6 @@ class PatientManagement extends ComponentBase
             throw new ApplicationException('У вас нет прав для просмотра списка пациентов.');
         }
     }
-
-
     
     // Создание пациента (doctor_id — необязательное поле)
     public function onCreatePatient()
@@ -262,9 +284,61 @@ class PatientManagement extends ComponentBase
 
         return $appointment; // Возвращаем объект Appointment
     }
+    
+    // Создание записи на приём существующего в базе пациента 
+    public function onCreateAppointmentForExistingPatient()
+    {
+        try {
+            $data = post();
 
+            // Проверка обязательных полей
+            if (empty($data['patient_id'])) {
+                throw new ApplicationException('Пожалуйста, выберите пациента.');
+            }
 
+            if (empty($data['visit_type'])) {
+                throw new ApplicationException('Пожалуйста, выберите тип визита.');
+            }
 
+            if (empty($data['appointment_date'])) {
+                throw new ApplicationException('Пожалуйста, выберите дату приёма.');
+            }
+
+            // Поиск пациента
+            $patient = User::find($data['patient_id']);
+            if (!$patient || !$patient->groups()->where('code', 'patients')->exists()) {
+                throw new ApplicationException('Пациент не найден.');
+            }
+
+            // Получаем ID врача из формы
+            $doctorId = $data['doctor_id'];
+
+            // Используем уже существующий метод для создания записи на прием
+            $appointment = $this->createAppointment(
+                $patient, 
+                $doctorId, 
+                $data['appointment_date'], 
+                $data['appointment_time'], 
+                $data['visit_type']
+            );
+
+            Flash::success('Запись на прием успешно создана.');
+
+            // Возвращаем данные для сброса формы
+            return [
+                'error' => false,
+                'message' => 'Пациент успешно записан на приём.',
+                'appointment' => $appointment, // Возвращаем данные о записи, если нужно
+                'resetForm' => true // Флаг для сброса формы
+            ];
+        } catch (\Exception $e) {
+            return [
+                'error' => true,
+                'message' => 'Ошибка при создании записи: ' . $e->getMessage()
+            ];
+        }
+    }
+  
   public function onUpdatePatient()
   {
       try {

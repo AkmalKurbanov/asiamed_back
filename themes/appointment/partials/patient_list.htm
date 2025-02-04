@@ -1,57 +1,480 @@
 {% if patients is not empty %}
-  {% set hasFutureAppointments = false %}
-  {% for patient in patients %}
-    {% if this.page.fileName == 'doctor-booked-patients.htm' %}
-      {% set futureAppointments = patient.appointments|filter(appointment => appointment.appointment_date|date('Y-m-d') >= 'now'|date('Y-m-d')) %}
-    {% endif %}
-    
-    {% if futureAppointments is not empty or this.page.fileName == 'doctor-attached-patients.htm' %}
-      {% set hasFutureAppointments = true %}
-      <tr class="
-        {% if this.page.fileName == 'doctor-attached-patients.htm' and patient.id in newAttachedPatients %}
-          new-patient
-        {% elseif this.page.fileName == 'doctor-booked-patients.htm' and patient.id in newBookedPatients %}
-          new-patient
-        {% endif %}
-      ">
-        <td>{{ patient.name }}</td>
-        <td>{{ patient.surname }}</td>
-        <td>{{ patient.birthdate|date('d.m.Y') }}</td>
-        <td>{{ patient.iu_telephone }}</td>
-        {% if show_doctor %}
-          <td>{{ patient.doctor ? patient.doctor.name : 'Не назначен' }}</td>
-        {% endif %}
+    {% for patient in patients %}
+        {% set hasFutureAppointments = false %}
 
         {% if this.page.fileName == 'doctor-booked-patients.htm' %}
-          <td>
-            {% for appointment in futureAppointments %}
-              {{ appointment.appointment_date|date('d.m.Y') }}
-            {% endfor %}
-          </td>
+            {% set futureAppointments = patient.appointments|filter(appointment => appointment.appointment_date >= 'now'|date('Y-m-d')) %}
+
+            {% if futureAppointments is not empty %}
+                {% set hasFutureAppointments = true %}
+            {% endif %}
         {% endif %}
 
-        <td>
-          <div class="btn-group">
-            <button type="button" class="btn btn-sm btn-success dropdown-toggle dropdown-hover dropdown-icon" data-toggle="dropdown">
-              <span>Открыть</span>
-            </button>
-            <div class="dropdown-menu" role="menu">
-              <a class="dropdown-item" href="{{ 'edit-patient' | page({ patient_id: patient.id }) }}">Редактировать профиль</a>
-              <a class="dropdown-item" href="{{ 'appointment-patient' | page({ patient_id: patient.id }) }}">Записать на прием</a>
-            </div>
-          </div>
-        </td>
-      </tr>
-    {% endif %}
-  {% endfor %}
+        {# Показ для всех пациентов (для администратора) или только для врачей с будущими записями #}
+        {% if this.page.fileName != 'doctor-booked-patients.htm' or hasFutureAppointments %}
+            <tr class="
+                {% if this.page.fileName == 'doctor-attached-patients.htm' and patient.id in newAttachedPatients %}
+                    new-patient
+                {% elseif this.page.fileName == 'doctor-booked-patients.htm' and patient.id in newBookedPatients %}
+                    new-patient
+                {% endif %}
+            ">
+                <td>{{ patient.name }}</td>
+                <td>{{ patient.surname }}</td>
+                <td>
+                  {% if patient.birthdate %}
+                      {{ patient.birthdate|date('d.m.Y') }}
+                  {% else %}
+                      Не указано
+                  {% endif %}
+                </td>
+                <td>{{ patient.iu_telephone }}</td>
+                
+                {# Показ лечащего врача, если это необходимо #}
+                {% if show_doctor %}
+                  <td>
+                    {% if patient.doctor and patient.doctor.name %}
+                        {{ patient.doctor.name }}
+                    {% else %}
+                        Не назначен
+                    {% endif %}
+                </td>
+                {% endif %}
+                
+                {# Показ информации о будущих приемах для врачей #}
+                {% if this.page.fileName == 'doctor-booked-patients.htm' %}
+                    <td>
+                        {% for appointment in futureAppointments %}
+                            {{ appointment.appointment_date|date('d.m.Y') }} |
+                            {{ appointment.appointment_time|date('H:i') }}
+                        {% endfor %}
+                    </td>
+                {% endif %}
 
-  {% if not hasFutureAppointments %}
-    <tr>
-      <td colspan="6">Пациенты не найдены.</td>
-    </tr>
-  {% endif %}
+                <td>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle dropdown-hover dropdown-icon" data-toggle="dropdown">
+                            <span>Открыть</span>
+                        </button>
+                        <div class="dropdown-menu" role="menu">
+                            <a class="dropdown-item" href="{{ 'edit-patient' | page({ patient_id: patient.id }) }}">Редактировать профиль</a>
+                            
+                            {% for group in user.groups %}
+                              {% if group.code == 'admins' %}
+                                <a class="dropdown-item" href="{{ 'appointment-patient' | page({ patient_id: patient.id }) }}">Записать на прием</a>
+                                {% else %}
+                              {% endif %}
+                            {% endfor %}
+                            
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        {% endif %}
+    {% endfor %}
+
+    {# Сообщение, если не найдено пациентов или нет будущих приемов #}
+    {% if this.page.fileName == 'doctor-booked-patients.htm' and not hasFutureAppointments %}
+        <tr>
+            <td colspan="6">Пациенты с запланированными приемами не найдены.</td>
+        </tr>
+    {% endif %}
 {% else %}
-  <tr>
-    <td colspan="6">Пациенты не найдены.</td>
-  </tr>
+    <tr>
+        <td colspan="6">Пациенты не найдены.</td>
+    </tr>
 {% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Sub Ñäåëàòü_ïîäñ÷åò_â_êàæäîì_ëèñòå()
+    Dim ws As Worksheet
+    ' Öèêë ïî âñåì ëèñòàì â êíèãå
+    For Each ws In ThisWorkbook.Sheets
+        ' Ïðîïóñêàåì ëèñòû "Ñâîä" è "Ýòàëîííûé"
+        If ws.Name <> "Ñâîä" And ws.Name <> "Ýòàëîííûé" Then
+            ' Îáðàáàòûâàåì ëèñò
+            Call ProcessSheet(ws.Name)
+        End If
+    Next ws
+End Sub
+
+Sub ProcessSheet(sheetName As String)
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim maxRow As Long
+    Dim totalIncome As Double
+    Dim totalMbank As Double
+    Dim totalAdvance As Double
+    Dim totalNightProcedures As Double ' Äîáàâëÿåì ïåðåìåííóþ äëÿ íîâîé êîëîíêè
+    Dim incomeCol As Long
+    Dim mbankCol As Long
+    Dim advanceCol As Long
+    Dim nightProceduresCol As Long ' Äîáàâëÿåì ïåðåìåííóþ äëÿ íîâîé êîëîíêè
+    Dim i As Long
+
+    ' Ïîëó÷àåì ëèñò ïî èìåíè
+    Set ws = ThisWorkbook.Sheets(sheetName)
+    
+    ' Óäàëÿåì ñòðîêè ñ èòîãàìè, åñëè îíè ñóùåñòâóþò
+    Call RemoveOldTotals(ws)
+
+    ' Óäàëÿåì ïóñòûå ñòðîêè, òîëüêî åñëè ÂÑÅ êëþ÷åâûå êîëîíêè ïóñòû
+    Call RemoveEmptyRows(ws)
+
+    ' Íàõîäèì ñòîëáöû "Ïîñòóïëåíèå", "Ïðèìå÷àíèå Mbank", "Àâàíñ" è "Íî÷ü / Ïðîöåäóðû"
+    incomeCol = FindColumn(ws, "Ïîñòóïëåíèå")
+    mbankCol = FindColumn(ws, "Ïðèìå÷àíèå Mbank")
+    advanceCol = FindColumn(ws, "Àâàíñ")
+    nightProceduresCol = FindColumn(ws, "Íî÷ü / Ïðîöåäóðû") ' Äîáàâëÿåì íîâûé ñòîëáåö
+
+    ' Åñëè íàéäåíû íóæíûå êîëîíêè
+    If incomeCol > 0 And mbankCol > 0 And advanceCol > 0 And nightProceduresCol > 0 Then
+        ' Íàõîäèì ìàêñèìàëüíóþ çàïîëíåííóþ ñòðîêó ñðåäè âñåõ êîëîíîê
+        maxRow = Application.WorksheetFunction.Max(ws.Cells(ws.Rows.Count, incomeCol).End(xlUp).row, _
+                                                   ws.Cells(ws.Rows.Count, mbankCol).End(xlUp).row, _
+                                                   ws.Cells(ws.Rows.Count, advanceCol).End(xlUp).row, _
+                                                   ws.Cells(ws.Rows.Count, nightProceduresCol).End(xlUp).row)
+
+        ' Ñóììèðóåì çíà÷åíèÿ â êàæäîé êîëîíêå
+        For i = 2 To maxRow ' Ïðåäïîëàãàåì, ÷òî çàãîëîâêè â ïåðâîé ñòðîêå
+            If IsNumeric(ws.Cells(i, incomeCol).Value) Then
+                totalIncome = totalIncome + ws.Cells(i, incomeCol).Value
+            End If
+            If IsNumeric(ws.Cells(i, mbankCol).Value) Then
+                totalMbank = totalMbank + ws.Cells(i, mbankCol).Value
+            End If
+            If IsNumeric(ws.Cells(i, advanceCol).Value) Then
+                totalAdvance = totalAdvance + ws.Cells(i, advanceCol).Value
+            End If
+            If IsNumeric(ws.Cells(i, nightProceduresCol).Value) Then
+                totalNightProcedures = totalNightProcedures + ws.Cells(i, nightProceduresCol).Value
+            End If
+        Next i
+
+        ' Ñíîâà óäàëÿåì ïóñòûå ñòðîêè ïîñëå ðàñ÷åòîâ
+        Call RemoveEmptyRows(ws)
+
+        ' Íàõîäèì ñòðîêó ïîñëå ïîñëåäíåé çàïîëíåííîé
+        maxRow = ws.Cells(ws.Rows.Count, incomeCol).End(xlUp).row
+        
+        ' Âñòàâëÿåì ïóñòóþ ñòðîêó ïåðåä âûâîäîì èòîãîâ
+        ws.Rows(maxRow + 1).Insert Shift:=xlDown
+
+        ' Âûâîäèì èòîãè â ñòðîêå, ñëåäóþùåé çà ïîñëåäíåé ñòðîêîé ñ äàííûìè
+        ws.Cells(maxRow + 2, incomeCol).Value = "Èòîãî: " & totalIncome
+        ws.Cells(maxRow + 2, mbankCol).Value = "Èòîãî: " & totalMbank
+        ws.Cells(maxRow + 2, advanceCol).Value = "Èòîãî: " & totalAdvance
+        ws.Cells(maxRow + 2, nightProceduresCol).Value = "Èòîãî: " & totalNightProcedures ' Âûâîäèì èòîã äëÿ íîâîé êîëîíêè
+
+        ' Ôîðìàòèðóåì èòîãîâûå ñòðîêè
+        ws.Cells(maxRow + 2, incomeCol).Font.Bold = True
+        ws.Cells(maxRow + 2, mbankCol).Font.Bold = True
+        ws.Cells(maxRow + 2, advanceCol).Font.Bold = True
+        ws.Cells(maxRow + 2, nightProceduresCol).Font.Bold = True ' Ôîðìàòèðóåì èòîãîâóþ ñòðîêó íîâîé êîëîíêè
+    Else
+        MsgBox "Íå íàéäåíû íåîáõîäèìûå êîëîíêè íà ëèñòå " & sheetName
+    End If
+End Sub
+
+Sub RemoveEmptyRows(ws As Worksheet)
+    Dim i As Long
+    Dim incomeCol As Long
+    Dim mbankCol As Long
+    Dim advanceCol As Long
+    Dim doctorCol As Long
+    Dim nightProceduresCol As Long ' Äîáàâëÿåì ïåðåìåííóþ äëÿ íîâîé êîëîíêè
+    Dim rowIsEmpty As Boolean
+
+    ' Íàõîäèì ñòîëáöû "Ïîñòóïëåíèå", "Ïðèìå÷àíèå Mbank", "Àâàíñ", "Âðà÷" è "Íî÷ü / Ïðîöåäóðû"
+    incomeCol = FindColumn(ws, "Ïîñòóïëåíèå")
+    mbankCol = FindColumn(ws, "Ïðèìå÷àíèå Mbank")
+    advanceCol = FindColumn(ws, "Àâàíñ")
+    doctorCol = FindColumn(ws, "Âðà÷") ' Íàõîäèì êîëîíêó "Âðà÷"
+    nightProceduresCol = FindColumn(ws, "Íî÷ü / Ïðîöåäóðû") ' Íàõîäèì íîâóþ êîëîíêó
+
+    ' Ïðîâåðÿåì, ÷òî âñå íåîáõîäèìûå êîëîíêè íàéäåíû
+    If incomeCol = 0 Or mbankCol = 0 Or advanceCol = 0 Or doctorCol = 0 Or nightProceduresCol = 0 Then
+        MsgBox "Íå íàéäåíû âñå íåîáõîäèìûå êîëîíêè íà ëèñòå " & ws.Name
+        Exit Sub
+    End If
+
+    ' Öèêë ïî ñòðîêàì ñ êîíöà ââåðõ, íà÷èíàÿ ñ 2-é ñòðîêè (÷òîáû íå óäàëÿòü çàãîëîâêè)
+    For i = ws.Cells(ws.Rows.Count, 1).End(xlUp).row To 2 Step -1
+        ' Ïðîâåðÿåì, åñëè âñå êëþ÷åâûå êîëîíêè â ñòðîêå ïóñòû, ÍÎ êîëîíêà "Âðà÷" íå äîëæíà áûòü ïóñòîé
+        rowIsEmpty = IsEmpty(ws.Cells(i, incomeCol)) And _
+                     IsEmpty(ws.Cells(i, mbankCol)) And _
+                     IsEmpty(ws.Cells(i, advanceCol)) And _
+                     IsEmpty(ws.Cells(i, doctorCol)) And _
+                     IsEmpty(ws.Cells(i, nightProceduresCol)) ' Ïðîâåðÿåì íîâóþ êîëîíêó
+
+        ' Åñëè ñòðîêà ïóñòàÿ, óäàëÿåì å¸
+        If rowIsEmpty Then
+            ws.Rows(i).Delete
+        End If
+    Next i
+End Sub
+
+Function FindColumn(ws As Worksheet, headerName As String) As Long
+    Dim i As Long
+    ' Èùåì êîëîíêó ñ çàãîëîâêîì
+    For i = 1 To ws.Columns.Count
+        If Trim(ws.Cells(1, i).Value) = headerName Then
+            FindColumn = i
+            Exit Function
+        End If
+    Next i
+    FindColumn = 0 ' Âîçâðàùàåì 0, åñëè íå íàéäåíà êîëîíêà
+End Function
+
+Sub RemoveOldTotals(ws As Worksheet)
+    Dim i As Long
+    Dim lastRow As Long
+    Dim incomeCol As Long
+    Dim mbankCol As Long
+    Dim advanceCol As Long
+    Dim nightProceduresCol As Long ' Äîáàâëÿåì ïåðåìåííóþ äëÿ íîâîé êîëîíêè
+
+    ' Íàõîäèì ñòîëáöû "Ïîñòóïëåíèå", "Ïðèìå÷àíèå Mbank", "Àâàíñ" è "Íî÷ü / Ïðîöåäóðû"
+    incomeCol = FindColumn(ws, "Ïîñòóïëåíèå")
+    mbankCol = FindColumn(ws, "Ïðèìå÷àíèå Mbank")
+    advanceCol = FindColumn(ws, "Àâàíñ")
+    nightProceduresCol = FindColumn(ws, "Íî÷ü / Ïðîöåäóðû") ' Íàõîäèì íîâóþ êîëîíêó
+
+    ' Íàõîäèì ïîñëåäíþþ ñòðîêó ñ äàííûìè
+    lastRow = ws.Cells(ws.Rows.Count, incomeCol).End(xlUp).row
+
+    ' Öèêë ïî ñòðîêàì ñ êîíöà, ÷òîáû íàéòè è óäàëèòü ñòàðûå èòîãè
+    For i = lastRow To 2 Step -1
+       If nightProceduresCol > 0 Then
+    If ws.Cells(i, incomeCol).Value Like "*Èòîãî*" Or _
+       ws.Cells(i, mbankCol).Value Like "*Èòîãî*" Or _
+       ws.Cells(i, advanceCol).Value Like "*Èòîãî*" Or _
+       ws.Cells(i, nightProceduresCol).Value Like "*Èòîãî*" Then
+        ws.Rows(i).Delete ' Óäàëÿåì ñòðîêó, åñëè íàéäåíî ñëîâî "Èòîãî"
+    End If
+Else
+    If ws.Cells(i, incomeCol).Value Like "*Èòîãî*" Or _
+       ws.Cells(i, mbankCol).Value Like "*Èòîãî*" Or _
+       ws.Cells(i, advanceCol).Value Like "*Èòîãî*" Then
+        ws.Rows(i).Delete ' Óäàëÿåì ñòðîêó, åñëè íàéäåíî ñëîâî "Èòîãî"
+    End If
+End If
+    Next i
+End Sub
+
+
+
+
+Sub Ñêîïèðîâàòü_ñïèñîê_âðà÷åé_èç_ýòàëîííîãî_ñïèñêà()
+    Dim sourceWs As Worksheet
+    Dim targetWs As Worksheet
+    Dim doctorCol As Long
+    Dim lastRowSource As Long
+    Dim i As Long
+
+    ' Óêàçûâàåì ëèñò ñ ýòàëîííûì ñïèñêîì âðà÷åé
+    Set sourceWs = ThisWorkbook.Sheets("Ýòàëîííûé")
+    
+    ' Íàõîäèì êîëîíêó ñ âðà÷àìè íà ëèñòå "Ýòàëîííûé"
+    doctorCol = FindColumn(sourceWs, "Âðà÷")
+    
+    ' Ïðîâåðÿåì, ÷òî êîëîíêà "Âðà÷" íàéäåíà
+    If doctorCol = 0 Then
+        MsgBox "Êîëîíêà 'Âðà÷' íå íàéäåíà íà ëèñòå 'Ýòàëîííûé'"
+        Exit Sub
+    End If
+    
+    ' Íàõîäèì ïîñëåäíþþ ñòðîêó ñ âðà÷àìè íà ëèñòå "Ýòàëîííûé"
+    lastRowSource = sourceWs.Cells(sourceWs.Rows.Count, doctorCol).End(xlUp).row
+    
+    ' Öèêë ïî âñåì ëèñòàì, êðîìå "Ýòàëîííûé" è "Ñâîä"
+    For Each targetWs In ThisWorkbook.Sheets
+        If targetWs.Name <> "Ñâîä" And targetWs.Name <> "Ýòàëîííûé" Then
+            ' Íàõîäèì êîëîíêó "Âðà÷" íà öåëåâîì ëèñòå
+            doctorCol = FindColumn(targetWs, "Âðà÷")
+            
+            ' Åñëè êîëîíêà "Âðà÷" íàéäåíà íà öåëåâîì ëèñòå
+            If doctorCol > 0 Then
+                ' Î÷èùàåì ñòàðûé ñïèñîê âðà÷åé íà öåëåâîì ëèñòå, íà÷èíàÿ ñî 2-é ñòðîêè
+                targetWs.Range(targetWs.Cells(2, doctorCol), targetWs.Cells(targetWs.Rows.Count, doctorCol)).ClearContents
+                
+                ' Êîïèðóåì âðà÷åé ñ ýòàëîííîãî ëèñòà íà öåëåâîé ëèñò, íà÷èíàÿ ñî 2-é ñòðîêè
+                For i = 2 To lastRowSource
+                    targetWs.Cells(i, doctorCol).Value = sourceWs.Cells(i, doctorCol).Value
+                Next i
+            Else
+                MsgBox "Êîëîíêà 'Âðà÷' íå íàéäåíà íà ëèñòå " & targetWs.Name
+            End If
+        End If
+    Next targetWs
+End Sub
+Sub Âûâåñòè_ñâîä()
+    Dim ws As Worksheet
+    Dim ñâîäWs As Worksheet
+    Dim doctorCol As Long
+    Dim incomeCol As Long
+    Dim advanceCol As Long
+    Dim lastRow As Long
+    Dim i As Long
+    Dim doctorsList As Object
+    Dim currentRow As Long
+    Dim currentColumn As Long
+    Dim doctor As Variant
+    Dim totalAdvance As Double ' Ïåðåìåííàÿ äëÿ ñóììû àâàíñîâ
+    Dim totalIncome As Double ' Ïåðåìåííàÿ äëÿ ñóììû ïîñòóïëåíèé
+    Dim doctorTotal As Double ' Ïåðåìåííàÿ äëÿ ðàñ÷åòà (ñóììà ïîñòóïëåíèé / 2) - àâàíñ
+    
+    Set doctorsList = CreateObject("Scripting.Dictionary")
+    
+    ' Óêàçûâàåì ëèñò "Ñâîä"
+    Set ñâîäWs = ThisWorkbook.Sheets("Ñâîä")
+    
+    ' Î÷èùàåì ïðåäûäóùèé ñïèñîê âðà÷åé â "Ñâîä"
+    ñâîäWs.Cells.ClearContents
+
+    ' Çàïèñûâàåì çàãîëîâîê ïåðâîé êîëîíêè
+    ñâîäWs.Cells(1, 1).Value = "Äàòà"
+    
+    ' Çàïèñûâàåì çàãîëîâîê äëÿ èòîãîâ
+    ñâîäWs.Cells(1, ñâîäWs.Cells(1, ñâîäWs.Columns.Count).End(xlToLeft).Column + 1).Value = "Èòîãî"
+    
+    ' Öèêë ïî âñåì ëèñòàì â êíèãå, êðîìå "Ñâîä" è "Ýòàëîííûé"
+    For Each ws In ThisWorkbook.Sheets
+        If ws.Name <> "Ñâîä" And ws.Name <> "Ýòàëîííûé" Then
+            ' Íàõîäèì êîëîíêó "Âðà÷" â òåêóùåì ëèñòå
+            doctorCol = FindColumnInWorksheet(ws, "Âðà÷")
+            ' Íàõîäèì êîëîíêó "Ïîñòóïëåíèå" â òåêóùåì ëèñòå
+            incomeCol = FindColumnInWorksheet(ws, "Ïîñòóïëåíèå")
+            If doctorCol > 0 And incomeCol > 0 Then
+                ' Íàõîäèì ïîñëåäíþþ ñòðîêó ñ âðà÷àìè íà òåêóùåì ëèñòå
+                lastRow = ws.Cells(ws.Rows.Count, doctorCol).End(xlUp).row
+                
+                ' Çàïèñûâàåì óíèêàëüíûõ âðà÷åé â ñëîâàðü
+                For i = 2 To lastRow
+                    If Not doctorsList.exists(ws.Cells(i, doctorCol).Value) Then
+                        doctorsList.Add ws.Cells(i, doctorCol).Value, ws.Cells(i, doctorCol).Value
+                    End If
+                Next i
+            End If
+        End If
+    Next ws
+    
+    ' Çàïèñûâàåì ñïèñîê óíèêàëüíûõ âðà÷åé â çàãîëîâêè, íà÷èíàÿ ñî 2-é êîëîíêè
+    currentColumn = 2
+    For Each doctor In doctorsList.keys
+        ñâîäWs.Cells(1, currentColumn).Value = doctor
+        currentColumn = currentColumn + 1
+    Next doctor
+    
+    ' Öèêë ïî âñåì ëèñòàì åùå ðàç äëÿ çàïèñè äàò, ïîñòóïëåíèé è àâàíñîâ
+    currentRow = 2
+    For Each ws In ThisWorkbook.Sheets
+        If ws.Name <> "Ñâîä" And ws.Name <> "Ýòàëîííûé" Then
+            ' Çàïèñûâàåì äàòó (íàçâàíèå ëèñòà) â ïåðâóþ êîëîíêó òåêóùåé ñòðîêè
+            ñâîäWs.Cells(currentRow, 1).Value = ws.Name
+            
+            ' Ïðîâåðÿåì íàëè÷èå âðà÷åé, ïîñòóïëåíèé è àâàíñîâ â òåêóùåì ëèñòå
+            doctorCol = FindColumnInWorksheet(ws, "Âðà÷")
+            incomeCol = FindColumnInWorksheet(ws, "Ïîñòóïëåíèå")
+            advanceCol = FindColumnInWorksheet(ws, "Àâàíñ")
+            If doctorCol > 0 And incomeCol > 0 And advanceCol > 0 Then
+                lastRow = ws.Cells(ws.Rows.Count, doctorCol).End(xlUp).row
+                For i = 2 To lastRow
+                    ' Èùåì âðà÷à â çàãîëîâêå "Ñâîä" è çàïèñûâàåì åãî ïîñòóïëåíèÿ è àâàíñ
+                    For currentColumn = 2 To ñâîäWs.Cells(1, ñâîäWs.Columns.Count).End(xlToLeft).Column
+                        If ws.Cells(i, doctorCol).Value = ñâîäWs.Cells(1, currentColumn).Value Then
+                            ' Çàïèñûâàåì ñóììó ïîñòóïëåíèé ïîä íóæíûì âðà÷îì
+                            If IsNumeric(ws.Cells(i, incomeCol).Value) Then
+                                ñâîäWs.Cells(currentRow, currentColumn).Value = ws.Cells(i, incomeCol).Value
+                            End If
+                        End If
+                    Next currentColumn
+                Next i
+            End If
+            
+            ' Ïåðåõîäèì íà ñëåäóþùóþ ñòðîêó äëÿ ñëåäóþùåãî ëèñòà
+            currentRow = currentRow + 1
+        End If
+    Next ws
+    
+    ' Çàïèñûâàåì îáùóþ ñóììó àâàíñîâ ïîä êàæäûì âðà÷îì
+    currentRow = currentRow + 1 ' Ïåðåõîäèì íà ñòðîêó íèæå ïîñòóïëåíèé
+    ñâîäWs.Cells(currentRow, 1).Value = "Îáùèé àâàíñ"
+    
+    ' Ñíîâà ïðîõîäèì ïî âñåì ëèñòàì äëÿ çàïèñè ñóìì àâàíñîâ
+    For Each ws In ThisWorkbook.Sheets
+        If ws.Name <> "Ñâîä" And ws.Name <> "Ýòàëîííûé" Then
+            doctorCol = FindColumnInWorksheet(ws, "Âðà÷")
+            advanceCol = FindColumnInWorksheet(ws, "Àâàíñ")
+            If doctorCol > 0 And advanceCol > 0 Then
+                lastRow = ws.Cells(ws.Rows.Count, doctorCol).End(xlUp).row
+                For i = 2 To lastRow
+                    ' Èùåì âðà÷à â çàãîëîâêå "Ñâîä" è çàïèñûâàåì åãî îáùèé àâàíñ
+                    For currentColumn = 2 To ñâîäWs.Cells(1, ñâîäWs.Columns.Count).End(xlToLeft).Column
+                        If ws.Cells(i, doctorCol).Value = ñâîäWs.Cells(1, currentColumn).Value Then
+                            ' Ñóììèðóåì àâàíñ
+                            If IsNumeric(ws.Cells(i, advanceCol).Value) Then
+                                ñâîäWs.Cells(currentRow, currentColumn).Value = ñâîäWs.Cells(currentRow, currentColumn).Value + ws.Cells(i, advanceCol).Value
+                                ' Êðàñèì ÿ÷åéêè "Îáùèé àâàíñ" â ñâåòëî-ñèíèé öâåò
+                                ñâîäWs.Cells(currentRow, currentColumn).Interior.Color = RGB(173, 216, 230)
+                            End If
+                        End If
+                    Next currentColumn
+                Next i
+            End If
+        End If
+    Next ws
+    
+    ' Ðàññ÷èòûâàåì è çàïèñûâàåì èòîã ((ñóììà ïîñòóïëåíèé / 2) - àâàíñ) ïîä êàæäûì âðà÷îì
+    currentRow = currentRow + 1 ' Ïåðåõîäèì íà ñòðîêó íèæå àâàíñîâ
+    ñâîäWs.Cells(currentRow, 1).Value = "Èòîãî"
+    
+    For currentColumn = 2 To ñâîäWs.Cells(1, ñâîäWs.Columns.Count).End(xlToLeft).Column
+        totalIncome = Application.WorksheetFunction.Sum(ñâîäWs.Range(ñâîäWs.Cells(2, currentColumn), ñâîäWs.Cells(currentRow - 2, currentColumn)))
+        totalAdvance = ñâîäWs.Cells(currentRow - 1, currentColumn).Value
+        ' Ðàññ÷åò ïî íîâîé ôîðìóëå: (ñóììà ïîñòóïëåíèé / 2) - àâàíñ
+        doctorTotal = (totalIncome / 2) - totalAdvance
+        ñâîäWs.Cells(currentRow, currentColumn).Value = doctorTotal
+        ' Êðàñèì ÿ÷åéêè "Èòîãî" â êðàñíûé öâåò
+        ñâîäWs.Cells(currentRow, currentColumn).Interior.Color = RGB(255, 0, 0)
+    Next currentColumn
+    
+    ' Àâòîìàòè÷åñêè ïîäãîíÿåì øèðèíó êîëîíîê ïîä ñîäåðæèìîå
+    ñâîäWs.Columns.AutoFit
+    
+    MsgBox "Ñïèñîê óíèêàëüíûõ âðà÷åé, ñóììû ïîñòóïëåíèé, àâàíñû è èòîãè óñïåøíî âûâåäåíû â ëèñò 'Ñâîä'."
+End Sub
+
+Function FindColumnInWorksheet(ws As Worksheet, headerName As String) As Long
+    Dim i As Long
+    ' Èùåì êîëîíêó ñ çàãîëîâêîì
+    For i = 1 To ws.Columns.Count
+        If Trim(ws.Cells(1, i).Value) = headerName Then
+            FindColumnInWorksheet = i
+            Exit Function
+        End If
+    Next i
+    FindColumnInWorksheet = 0 ' Âîçâðàùàåì 0, åñëè íå íàéäåíà êîëîíêà
+End Function
+
+
+
+
+
+

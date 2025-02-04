@@ -1,0 +1,157 @@
+title = "Создание записи на прием"
+url = "/create-appointment"
+layout = "adminLTE_auth"
+is_hidden = 0
+
+[patientManagement]
+==
+
+<div class="register-box">
+  <div class="card card-outline card-primary">
+    <div class="card-header text-center">
+      <a href="../../index2.html" class="h1"><b>Admin</b>LTE</a>
+    </div>
+    <div class="card-body">
+      <p class="login-box-msg">Создание записи на прием</p>
+      
+      <form id="appointmentForm" 
+      data-request="patientManagement::onCreateAppointmentForExistingPatient" 
+      data-request-success="handleFormResponse(data, 'createAppointment')" 
+      class="validate-form">
+
+        <div class="form-group">
+          <label>Пациент</label>
+          <select class="form-control select2" style="width: 100%;" id="patient_id" name="patient_id">
+            <option value="" selected="selected">Выберите пациента</option>
+            {% for patient in patients %}
+              <option value="{{ patient.id }}">{{ patient.name }} {{ patient.surname }} {{ patient.birthdate|date('d.m.Y') }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      
+        <!-- Поля, которые показываются при выборе "с визитом" -->
+        
+          <div class="form-group">
+            <label>Тип визита</label>
+            <select class="form-control select" style="width: 100%;" id="visit_type" name="visit_type">
+              <option value="" selected="selected">Выберите тип</option>
+              <option value="амбулаторный">Амбулаторный</option>
+              <option value="стационарный">Стационарный</option>
+            </select>
+          </div>
+
+          <div class="form-group d-none for-type-js">
+            <label>Врач</label>
+            <select class="form-control select2" style="width: 100%;" id="doctor_id" name="doctor_id">
+              <option value="" selected="selected">Выберите врача</option>
+              {% for doctor in patientManagement.loadDoctorsList() %}
+                <option value="{{ doctor.id }}">{{ doctor.name }} {{ doctor.surname }} ({{ doctor.iu_job }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group clearfix">
+            <div class="icheck-primary d-none" id="make_primary_container">
+              <input type="checkbox" id="make_primary" name="make_primary">
+              <label for="make_primary">Постоянный лечащий врач</label>
+            </div>
+          </div>
+
+          <div class="form-group row d-none for-type-js">
+            <div class="col-6">
+              <div class="form-group m-0">
+                <label>Выберите дату:</label>
+                <div class="input-group date" id="datepicker" data-target-input="nearest">
+                  <input id="appointment_date" name="appointment_date" type="text" class="form-control datetimepicker-input" data-target="#datepicker" disabled>
+                  <div class="input-group-append" data-target="#datepicker" data-toggle="datetimepicker" id="datepicker-icon">
+                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="form-group m-0">
+                <label>Время:</label>
+                <div class="input-group date" id="timepicker" data-target-input="nearest">
+                  <input id="appointment_time" name="appointment_time" type="text" class="form-control datetimepicker-input" data-target="#timepicker" disabled>
+                  <div class="input-group-append" data-target="#timepicker" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-clock"></i></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group d-none" id="detailed-schedule">
+            <a href="#" class="badge badge-success" data-toggle="modal" data-target="#modal-xl">Подробное расписание</a>
+          </div>
+        
+
+        <button type="submit" class="btn btn-primary btn-block">Зарегистрировать</button>
+      </form>
+
+      
+    </div>
+    <!-- /.form-box -->
+  </div><!-- /.card -->
+</div>
+<!-- /.register-box -->
+
+
+
+
+<ul id="booked_times" class="list-group">
+    <!-- Здесь будет отображаться список забронированных времён -->
+</ul>
+
+
+
+
+
+<div class="modal fade" id="modal-xl" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Подробное расписание врача</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="calendar"></div>
+      </div>
+      <div class="modal-footer justify-content-end">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+
+
+
+
+
+<div class="modal fade" id="modal-warning">
+  <div class="modal-dialog">
+    <div class="modal-content bg-warning">
+      <div class="modal-header">
+        <h4 class="modal-title">Внимание</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Чтобы увидеть расписание, необходимо выбрать врача</p>
+      </div>
+      <div class="modal-footer justify-content-end">
+        <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>

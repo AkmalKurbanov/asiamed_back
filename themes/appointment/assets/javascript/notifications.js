@@ -149,3 +149,8 @@ function removeNotificationsFromList(type) {
     item.remove();
   });
 }
+
+
+
+
+

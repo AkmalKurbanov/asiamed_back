@@ -1,13 +1,13 @@
 // Настраиваем глобальные обработчики AJAX для блокировки кнопки
 $(document).on('ajaxSetup', function (event, context) {
   context.options.beforeSend = function () {
-    $("#patientForm").find("button[type='submit']").prop("disabled", true).text("Загрузка...");
+    $("#patientForm, #appointmentForm").find("button[type='submit']").prop("disabled", true).text("Загрузка...");
   };
 });
 
 // Разблокируем кнопку после завершения запроса
 $(document).on('ajaxComplete', function () {
-  $("#patientForm").find("button[type='submit']").prop("disabled", false).text("Зарегистрировать");
+  $("#patientForm, #appointmentForm").find("button[type='submit']").prop("disabled", false).text("Зарегистрировать");
 });
 
 // Обработка ответа формы
@@ -18,10 +18,11 @@ function handleFormResponse(data, formType) {
     toastr.success(data.message);
 
     // Сброс формы
-    $("#patientForm")[0].reset();
+    $("#patientForm, #appointmentForm")[0].reset();
 
     // Сброс селекта для врачей
     $("#doctor_id").val("").trigger("change");
+    $("#patient_id").val("").trigger("change");
 
     // Сброс даты и времени
     $("#appointment_date").val("").prop("disabled", true);
@@ -55,6 +56,9 @@ function handleFormResponse(data, formType) {
     $("#doctor_id option:first").prop("selected", true);
     $("#make_primary").prop("checked", false);
     $("#make_primary_container").addClass("d-none");
+
+    // Сброс календаря врача
+    $('#detailed-schedule').addClass("d-none");
   }
 }
 
@@ -262,6 +266,8 @@ if ($("#timepicker").length) {
     },
     stepping: 1,
     useCurrent: false,
+    disabledHours: [0, 1, 2, 3, 4, 5, 6, 19, 20, 21, 22, 23],
+    defaultDate: moment().hours(7).minutes(0).seconds(0).milliseconds(0),
   });
 }
 
@@ -592,3 +598,5 @@ $("#visit_type").on("change", function () {
 //   });
 
 // });
+
+
